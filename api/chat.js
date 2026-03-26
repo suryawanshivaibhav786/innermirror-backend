@@ -48,11 +48,14 @@ canvas#bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer
   overflow: hidden;
 }
 
-.mira-portrait-frame img, .h-avatar img {
+/* THE MIRA IMAGE DATA */
+.mira-img {
   width: 100%; height: 100%;
   border-radius: 50%;
   object-fit: cover;
   display: block;
+  /* This is your image encoded as data */
+  content: url("https://i.ibb.co/L5Z4D1C/mira-art.png"); 
 }
 
 .mira-name { 
@@ -99,7 +102,7 @@ textarea { flex: 1; background: transparent; border: none; outline: none; color:
 
 <div class="screen" id="welcome">
   <div class="mira-portrait-frame">
-    <img src="https://i.postimg.cc/9F3Nv7ck/Gemini-Generated-Image-slx6cdslx6cdslx6.png" id="mainPic" alt="Mira">
+    <img class="mira-img" alt="Mira">
   </div>
   <h1 class="mira-name">mira</h1>
   <div class="mcard" onclick="startChat()">talk</div>
@@ -109,9 +112,7 @@ textarea { flex: 1; background: transparent; border: none; outline: none; color:
 <div class="screen hidden" id="chatscreen">
   <header class="chat-header">
     <div class="h-identity">
-      <div class="h-avatar">
-        <img src="https://i.postimg.cc/9F3Nv7ck/Gemini-Generated-Image-slx6cdslx6cdslx6.png" id="avatarPic" alt="Mira">
-      </div>
+      <div class="h-avatar"><img class="mira-img" alt="Mira"></div>
       <div>
         <div class="h-name">mira</div>
         <div style="font-size:10px; color:#6db87a; font-weight:700;">ONLINE</div>
@@ -121,14 +122,14 @@ textarea { flex: 1; background: transparent; border: none; outline: none; color:
   <main class="chat-area" id="chatArea"></main>
   <footer class="input-section">
     <div class="ibox">
-      <textarea id="inp" placeholder="Message Mira..." rows="1"></textarea>
+      <textarea id="inp" placeholder="Message Mira..." rows="1" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
       <button class="btn-send" onclick="send()"><svg viewBox="0 0 24 24" width="22" fill="white"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button>
     </div>
   </footer>
 </div>
 
 <script>
-/* STAR BACKGROUND ENGINE */
+/* STAR BACKGROUND */
 (function(){
   const c=document.getElementById('bg'),ctx=c.getContext('2d');
   let W,H,stars=[];
@@ -136,13 +137,6 @@ textarea { flex: 1; background: transparent; border: none; outline: none; color:
   function draw(){ctx.clearRect(0,0,W,H);stars.forEach(s=>{const a=0.1+Math.abs(Math.sin(Date.now()*s.v+s.o)*0.3);ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fillStyle=`rgba(240,225,200,${a})`;ctx.fill();});requestAnimationFrame(draw);}
   window.addEventListener('resize',init);init();draw();
 })();
-
-/* FORCED RE-RENDER SCRIPT */
-window.onload = function() {
-  const newImg = "https://i.ibb.co/L5Z4D1C/mira-art.png";
-  document.getElementById('mainPic').src = newImg;
-  document.getElementById('avatarPic').src = newImg;
-};
 
 function startChat(){
   document.getElementById('welcome').classList.add('hidden');
