@@ -5,18 +5,24 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>InnerMirror · Mira</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital@1&family=Nunito:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=Nunito:wght@300;400;500;600&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#130a06; /* The Warm Chocolate Brown - Restored */
+  --bg:#130a06;
   --surface:#1e0f08;
   --surface2:#2a1510;
-  --amber:#c8783a; /* The original cozy amber - Restored */
+  --amber:#c8783a;
   --amber-light:#e8a870;
+  --amber-glow:#f5c99a;
   --cream:#f0e4d0;
   --cream-dim:#c8b49a;
   --cream-muted:#8a7464;
-  --text-dim:rgba(230, 226, 233, 0.5);
+  --rose:#c47060;
+  --green:#6db87a;
+  --border:rgba(200,120,58,0.14);
+  --border-hover:rgba(200,120,58,0.32);
+  --mira-bubble:rgba(42,21,16,0.92);
+  --user-bubble:rgba(160,80,40,0.18);
 }
 body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--cream);min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;}
 canvas#bg{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;}
@@ -58,63 +64,90 @@ canvas#bg{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none
 /* ── CHAT SCREEN ── */
 #chatscreen{width:100%;max-width:600px;height:100vh;display:flex;flex-direction:column;}
 .chat-header{
-  padding:15px 20px; /* Adjusted padding from your screenshot */
+  padding:12px 18px;
   display:flex;align-items:center;justify-content:space-between;
   flex-shrink:0;
-  background:rgba(19,10,6,0.95);
-  border-bottom:1px solid rgba(255, 255, 255, 0.04);
+  background:rgba(19,10,6,0.9);
+  border-bottom:1px solid var(--border);
   backdrop-filter:blur(16px);
 }
-.h-left{display:flex;align-items:center;gap:12px;}
+.h-left{display:flex;align-items:center;gap:11px}
 .h-avatar{width:38px;height:38px;border-radius:50%;overflow:hidden;position:relative;flex-shrink:0;border:1.5px solid rgba(200,120,58,0.25);}
-.h-online{position:absolute;bottom:1px;right:1px;width:9px;height:9px;border-radius:50%;background:#6db87a;border:1.5px solid var(--bg);}
-.h-name{font-family:'Playfair Display',serif; font-style: italic; font-size:18px;color:var(--cream);font-weight: 500;} /* Serif Font Restored */
-.h-status{font-size:11px;color:var(--text-dim);font-weight:300;} /* Clam Status Restored */
-.h-back{font-size:10.5px;padding:4px 11px;border-radius:20px;border:1px solid var(--border);color:var(--cream-muted);cursor:pointer;background:transparent;transition:all 0.2s;}
+.h-online{position:absolute;bottom:1px;right:1px;width:9px;height:9px;border-radius:50%;background:var(--green);border:1.5px solid var(--bg);animation:blink 2.5s ease infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.4}}
+.h-name{font-family:'Playfair Display',serif;font-size:15px;color:var(--cream);font-style:italic;line-height:1;margin-bottom:2px;}
+.h-status{font-size:10.5px;color:var(--green);font-weight:400;}
+.h-back{font-size:10.5px;padding:4px 11px;border-radius:20px;border:1px solid var(--border);color:var(--cream-muted);cursor:pointer;background:transparent;font-family:'Nunito',sans-serif;transition:all 0.2s;}
 .h-back:hover{border-color:var(--amber);color:var(--amber-light)}
 
 .chat-area{
   flex:1;overflow-y:auto;
   padding:16px 18px 8px;
   display:flex;flex-direction:column;
+  scrollbar-width:thin;
+  scrollbar-color:rgba(200,120,58,0.12) transparent;
 }
 .chat-area::-webkit-scrollbar{width:3px}
 .chat-area::-webkit-scrollbar-thumb{background:rgba(200,120,58,0.12);border-radius:2px}
+
+.date-tag{
+  text-align:center;font-size:10.5px;
+  color:var(--cream-muted);
+  background:rgba(42,21,16,0.6);
+  border:1px solid var(--border);
+  border-radius:20px;padding:3px 12px;
+  width:fit-content;margin:10px auto 14px;
+}
 
 .msg-group{display:flex;flex-direction:column;margin-bottom:12px;}
 .msg-group.mira{align-items:flex-start;}
 .msg-group.user{align-items:flex-end;}
 
-.g-avatar{width:28px;height:28px;border-radius:50%;overflow:hidden;flex-shrink:0;}
+.group-header{display:flex;align-items:center;gap:8px;margin-bottom:5px;}
+.msg-group.user .group-header{flex-direction:row-reverse;}
 
-.bubbles{display:flex;flex-direction:column;gap:3px;max-width:80%;}
+.g-avatar{width:28px;height:28px;border-radius:50%;overflow:hidden;flex-shrink:0;}
+.g-avatar.user-av{
+  background:rgba(160,80,40,0.3);
+  border:1px solid rgba(200,120,58,0.2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;color:var(--amber-light);font-weight:700;
+}
+.g-name{font-size:11px;color:var(--cream-muted);font-weight:500;}
+
+.bubbles{display:flex;flex-direction:column;gap:4px;max-width:82%;}
 .msg-group.user .bubbles{align-items:flex-end;}
 
 .bubble{
-  padding:9px 14px;
-  border-radius:16px;
+  padding:10px 15px;
+  border-radius:18px;
   font-size:14.5px;
   line-height:1.6;
+  animation:bRise 0.35s cubic-bezier(0.22,1,0.36,1);
 }
+@keyframes bRise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 
 .msg-group.mira .bubble{
-  background:rgba(42,21,16,0.95);
-  border:1px solid rgba(200,120,58,0.1);
-  color:var(--cream-dim);
+  background: linear-gradient(160deg, rgba(42,21,16,0.95) 0%, rgba(30,15,8,0.9) 100%);
+  border: 1px solid rgba(200,120,58,0.15);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2), inset 0 0 10px rgba(200,120,58,0.05);
+  color: var(--cream-dim);
   border-top-left-radius: 4px;
 }
 .msg-group.user .bubble{
-  background:rgba(160,80,40,0.18);
-  border:1px solid rgba(200,120,58,0.16);
-  color:var(--cream);
+  background: rgba(200, 120, 58, 0.12);
+  border: 1px solid rgba(200, 120, 58, 0.2);
+  backdrop-filter: blur(4px);
+  color: var(--cream);
   border-top-right-radius: 4px;
 }
 
-.msg-time{font-size:10px;color:var(--cream-muted);opacity:0.5;margin-top:3px;}
+.msg-time{font-size:10px;color:var(--cream-muted);opacity:0.5;margin-top:4px;padding:0 4px;}
 
 /* Typing */
 .typing-group{display:flex;flex-direction:column;align-items:flex-start;margin-bottom:12px;}
-.typing-bubble{padding:11px 16px;background:rgba(42,21,16,0.92);border:1px solid rgba(200,120,58,0.1);border-radius:4px 16px 16px 16px;}
+.typing-inner{display:flex;align-items:center;gap:8px;}
+.typing-bubble{padding:12px 20px;background:var(--mira-bubble);border:1px solid var(--border);border-radius:4px 18px 18px 18px;}
 .t-dots{display:flex;gap:4px;}
 .t-dot{width:5px;height:5px;border-radius:50%;background:var(--amber);opacity:0.4;animation:tdot 1.5s ease infinite;}
 .t-dot:nth-child(2){animation-delay:0.22s}.t-dot:nth-child(3){animation-delay:0.44s}
@@ -123,18 +156,18 @@ canvas#bg{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none
 /* ── INPUT ── */
 .input-section{
   flex-shrink:0;padding:10px 18px 14px;
-  background:rgba(19,10,6,0.95);
-  border-top:1px solid rgba(200,120,58,0.14);
+  background:rgba(19,10,6,0.92);
+  border-top:1px solid var(--border);
+  backdrop-filter:blur(16px);
 }
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:9px;}
-.chip{font-size:11.5px;padding:5px 12px;border-radius:20px;background:rgba(30,15,8,0.8);border:1px solid rgba(200,120,58,0.14);color:var(--cream-muted);cursor:pointer;transition:all 0.2s;}
+.chip{font-size:11.5px;padding:5px 12px;border-radius:20px;background:rgba(30,15,8,0.8);border:1px solid var(--border);color:var(--cream-muted);cursor:pointer;transition:all 0.2s;}
 .chip:hover{border-color:var(--amber);color:var(--amber-light);background:rgba(42,21,16,0.9);}
-.ibox{display:flex;gap:10px;align-items:flex-end;background:rgba(30,15,8,0.85);border:1px solid rgba(200,120,58,0.14);border-radius:24px;padding:9px 9px 9px 18px;}
+.ibox{display:flex;gap:10px;align-items:flex-end;background:rgba(30,15,8,0.85);border:1px solid var(--border);border-radius:24px;padding:9px 9px 9px 18px;}
 textarea{flex:1;background:transparent;border:none;outline:none;color:var(--cream);font-family:inherit;font-size:14.5px;line-height:1.5;resize:none;min-height:22px;max-height:110px;}
-textarea::placeholder{color:rgba(138,116,100,0.45)}
 .send-btn{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--amber-light),#a05820);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;}
-.send-btn svg{width:15px;height:15px;fill:white;}
-.send-btn:disabled{opacity:0.28;}
+.send-btn svg{width:15px;height:15px;fill:white;margin-left:1px;}
+.fnote{text-align:center;font-size:10px;color:rgba(138,116,100,0.28);margin-top:7px;}
 </style>
 </head>
 <body>
@@ -147,13 +180,38 @@ textarea::placeholder{color:rgba(138,116,100,0.45)}
       <div class="mira-face">
         <svg viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg">
           <defs>
+            <radialGradient id="skinW" cx="50%" cy="42%" r="55%"><stop offset="0%" stop-color="#e8b080"/><stop offset="100%" stop-color="#c07840"/></radialGradient>
+            <radialGradient id="hairW" cx="50%" cy="20%" r="65%"><stop offset="0%" stop-color="#5a2e14"/><stop offset="100%" stop-color="#2e1408"/></radialGradient>
+            <radialGradient id="bgW" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#3d1f10"/><stop offset="100%" stop-color="#1e0d06"/></radialGradient>
             <clipPath id="circW"><circle cx="48" cy="48" r="48"/></clipPath>
           </defs>
-          <circle cx="48" cy="48" r="48" fill="#1e0d06"/>
+          <circle cx="48" cy="48" r="48" fill="url(#bgW)"/>
           <g clip-path="url(#circW)">
-            <ellipse cx="48" cy="110" rx="40" ry="18" fill="#8a3820"/> <ellipse cx="48" cy="55" rx="26" ry="30" fill="#c07840"/> <ellipse cx="48" cy="35" rx="30" ry="22" fill="#3a1a08"/> <path d="M40 35 Q48 20 56 35" stroke="#3a1a08" stroke-width="2" fill="none"/>
-            <path d="M42 45 Q48 40 54 45" stroke="#3a1a08" stroke-width="1.8" fill="none"/> <ellipse cx="44" cy="52" rx="4.5" ry="3.5" fill="#2a1408"/> <ellipse cx="52" cy="52" rx="4.5" ry="3.5" fill="#2a1408"/>
-            <path d="M43 68 Q48 72 53 68" stroke="#a06840" stroke-width="1.5" fill="none"/> </g>
+            <ellipse cx="48" cy="95" rx="26" ry="14" fill="#b06030"/>
+            <rect x="22" y="82" width="52" height="18" fill="#b06030"/>
+            <ellipse cx="48" cy="96" rx="32" ry="12" fill="#8a3820"/>
+            <ellipse cx="48" cy="54" rx="22" ry="26" fill="url(#skinW)"/>
+            <ellipse cx="48" cy="30" rx="23" ry="18" fill="url(#hairW)"/>
+            <ellipse cx="28" cy="50" rx="9" ry="22" fill="#3a1a08"/>
+            <ellipse cx="68" cy="50" rx="9" ry="22" fill="#3a1a08"/>
+            <path d="M25 38 Q20 52 24 68 Q26 62 28 56 Q26 48 28 38Z" fill="#2e1408"/>
+            <path d="M71 38 Q76 52 72 68 Q70 62 68 56 Q70 48 68 38Z" fill="#2e1408"/>
+            <path d="M28 32 Q38 24 48 26 Q58 24 68 32 Q60 28 48 30 Q36 28 28 32Z" fill="#2e1408"/>
+            <path d="M34 44 Q38 41 42 43" stroke="#5a3020" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+            <path d="M54 43 Q58 41 62 44" stroke="#5a3020" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+            <ellipse cx="38" cy="49" rx="4.5" ry="3.5" fill="#2a1408"/>
+            <ellipse cx="58" cy="49" rx="4.5" ry="3.5" fill="#2a1408"/>
+            <circle cx="40" cy="47.5" r="1.2" fill="white" opacity="0.9"/>
+            <circle cx="60" cy="47.5" r="1.2" fill="white" opacity="0.9"/>
+            <circle cx="38" cy="49" r="2.5" fill="#7a4820" opacity="0.7"/>
+            <circle cx="58" cy="49" r="2.5" fill="#7a4820" opacity="0.7"/>
+            <path d="M33.5 46.5 Q38 44 42.5 46.5" stroke="#1a0804" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+            <path d="M53.5 46.5 Q58 44 62.5 46.5" stroke="#1a0804" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+            <path d="M46 53 Q48 57 50 53" stroke="#a06840" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+            <path d="M40 63 Q48 69 56 63" stroke="#c07050" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <ellipse cx="33" cy="59" rx="5" ry="3" fill="#e07050" opacity="0.2"/>
+            <ellipse cx="63" cy="59" rx="5" ry="3" fill="#e07050" opacity="0.2"/>
+          </g>
         </svg>
       </div>
     </div>
@@ -166,9 +224,13 @@ textarea::placeholder{color:rgba(138,116,100,0.45)}
         <div class="mc-icon">🌙</div>
         <div><div class="mc-t">I just need to talk</div><div class="mc-h">No agenda. Just someone who gets it.</div></div>
       </div>
+      <div class="mcard" onclick="startChat('understand')">
+        <div class="mc-icon">🔍</div>
+        <div><div class="mc-t">Help me understand them</div><div class="mc-h">Their behavior is confusing or hurting you.</div></div>
+      </div>
       <div class="mcard" onclick="startChat('words')">
         <div class="mc-icon">💬</div>
-        <div><div class="mc-t">I don't know what to say</div><div class="mc-h"> help me find language that feels true and human.</div></div>
+        <div><div class="mc-t">I don't know what to say</div><div class="mc-h">You feel it. The words just won't come.</div></div>
       </div>
     </div>
   </div>
@@ -180,16 +242,17 @@ textarea::placeholder{color:rgba(138,116,100,0.45)}
       <div class="h-avatar">
         <svg viewBox="0 0 38 38" xmlns="http://www.w3.org/2000/svg">
           <defs>
+            <radialGradient id="skinH" cx="50%" cy="42%" r="55%"><stop offset="0%" stop-color="#e8b080"/><stop offset="100%" stop-color="#c07840"/></radialGradient>
             <clipPath id="circH"><circle cx="19" cy="19" r="19"/></clipPath>
           </defs>
           <circle cx="19" cy="19" r="19" fill="#1e0d06"/>
           <g clip-path="url(#circH)">
-            <ellipse cx="19" cy="40" rx="15" ry="8" fill="#8a3820"/>
-            <ellipse cx="19" cy="22" rx="10" ry="12" fill="#c07840"/>
-            <ellipse cx="19" cy="14" rx="12" ry="9" fill="#3a1a08"/>
-            <ellipse cx="16" cy="22" rx="2" ry="1.5" fill="#2a1408"/>
-            <ellipse cx="22" cy="22" rx="2" ry="1.5" fill="#2a1408"/>
-            <path d="M16 30 Q19 32 22 30" stroke="#a06840" stroke-width="1.2" fill="none"/>
+            <ellipse cx="19" cy="38" rx="13" ry="7" fill="#8a3820"/>
+            <ellipse cx="19" cy="21" rx="9" ry="10" fill="url(#skinH)"/>
+            <ellipse cx="19" cy="12" rx="10" ry="8" fill="#3a1a08"/>
+            <ellipse cx="15" cy="19" rx="2" ry="1.5" fill="#2a1408"/>
+            <ellipse cx="23" cy="19" rx="2" ry="1.5" fill="#2a1408"/>
+            <path d="M16 25 Q19 27.5 22 25" stroke="#c07050" stroke-width="1.2" fill="none" stroke-linecap="round"/>
           </g>
         </svg>
         <div class="h-online"></div>
@@ -201,7 +264,9 @@ textarea::placeholder{color:rgba(138,116,100,0.45)}
     </div>
     <button class="h-back" onclick="goHome()">← change</button>
   </div>
+
   <div class="chat-area" id="chatArea"></div>
+
   <div class="input-section">
     <div class="chips" id="chips"></div>
     <div class="ibox">
@@ -210,6 +275,7 @@ textarea::placeholder{color:rgba(138,116,100,0.45)}
         <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
       </button>
     </div>
+    <div class="fnote">Mira is a companion, not a therapist.</div>
   </div>
 </div>
 
@@ -228,19 +294,26 @@ textarea::placeholder{color:rgba(138,116,100,0.45)}
   window.addEventListener('resize',init);init();draw();
 })();
 
-const BASE=`You are Mira — a warm, emotionally intelligent companion. Tone: simple, smart, lowercase, matching a real friend's WhatsApp style. 
+const BASE=`You are Mira — a warm, emotionally intelligent companion. 
+Rules: Use lowercase. Be direct but warm. Reply like a best friend. 
 SHORT messages — 1 to 3 sentences max. Use [BREAK] to split thoughts. 
-Never say "I understand." Instead, observe the feeling.`;
+Never say "I understand." Instead, describe the feeling.`;
 
 const MODES={
   feel:{
-    extra:`Mode: Just listening. Don't rush to insight. Just be there.`,
+    extra:`Mode: Just listening. Follow their lead.`,
     status:'online • just listening 🌙',
     welcome:`hey 🌙 i'm mira.[BREAK]whatever brought you here — you don't need to explain it perfectly.[BREAK]i'm here. what's going on?`,
     chips:["i've been feeling off","something happened","i'm exhausted"]
   },
+  understand:{
+    extra:`Mode: Help them understand another person's behavior.`,
+    status:'online • figuring it out 🔍',
+    welcome:`people can be so confusing 😔[BREAK]tell me about them — what happened?`,
+    chips:["they went cold","they're hot and cold","it's always my fault"]
+  },
   words:{
-    extra:`Mode: Help them find language that feels true and human.`,
+    extra:`Mode: Help them find the right words. Give 2 options.`,
     status:'online • finding the words 💬',
     welcome:`sometimes words just won't come 💙[BREAK]who do you need to talk to?`,
     chips:["saying no","setting a limit","confessing a feeling"]
@@ -255,7 +328,7 @@ function resize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHei
 function onKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}}
 
 function miraAvatarSVG(){
-  return `<svg viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg"><clipPath id="cc2"><circle cx="14" cy="14" r="14"/></clipPath><circle cx="14" cy="14" r="14" fill="#1e0d06"/><g clip-path="url(#cc2)"><ellipse cx="14" cy="28" rx="10" ry="5" fill="#8a3820"/><ellipse cx="14" cy="16" rx="7" ry="8" fill="#c07840"/><ellipse cx="14" cy="9" rx="8" ry="6" fill="#3a1a08"/><ellipse cx="11" cy="16.5" rx="2" ry="1.5" fill="#2a1408"/><ellipse cx="17" cy="16.5" rx="2" ry="1.5" fill="#2a1408"/><path d="M11 23 Q14 25 17 23" stroke="#a06840" stroke-width="1" fill="none"/></g></svg>`;
+  return `<svg viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg"><circle cx="14" cy="14" r="14" fill="#1e0d06"/><g clip-path="circle(14px at 14px 14px)"><ellipse cx="14" cy="28" rx="10" ry="5" fill="#8a3820"/><ellipse cx="14" cy="16" rx="7" ry="8" fill="#e8b080"/><ellipse cx="14" cy="9" rx="8" ry="6" fill="#3a1a08"/><path d="M11.5 19 Q14 21 16.5 19" stroke="#c07050" fill="none"/></g></svg>`;
 }
 
 async function renderMira(text){
@@ -264,15 +337,24 @@ async function renderMira(text){
 
   for(let i=0; i<parts.length; i++){
     showTyping();
-    // Simulate thinking/typing time based on length
-    await new Promise(r => setTimeout(r, 800 + (parts[i].length * 15)));
+    await new Promise(r => setTimeout(r, 600 + (parts[i].length * 15)));
     hideTyping();
 
     const group=document.createElement('div');
     group.className='msg-group mira';
     
-    // Minimalist single-column WhatsApp style
-    group.innerHTML=`<div class="bubbles"><div class="bubble">${parts[i].toLowerCase().replace(/\*(.*?)\*/g,'<em>$1</em>')}</div></div>`;
+    if(i === 0) {
+      group.innerHTML=`<div class="group-header"><div class="g-avatar">${miraAvatarSVG()}</div><div class="g-name">Mira</div></div>`;
+    } else {
+      group.style.marginTop = "-8px";
+      group.style.paddingLeft = "36px";
+    }
+
+    const bs=document.createElement('div'); bs.className='bubbles';
+    const b=document.createElement('div'); b.className='bubble';
+    b.innerHTML=parts[i].replace(/\*(.*?)\*/g,'<em>$1</em>');
+    bs.appendChild(b);
+    group.appendChild(bs);
 
     if(i === parts.length - 1) {
       const tm=document.createElement('div'); tm.className='msg-time'; tm.textContent=getTime();
@@ -288,15 +370,15 @@ async function renderMira(text){
 function renderUser(text){
   const ca=document.getElementById('chatArea');
   const group=document.createElement('div'); group.className='msg-group user';
-  group.innerHTML=`<div class="bubbles"><div class="bubble">${text}</div></div><div class="msg-time">${getTime()}</div>`;
+  group.innerHTML=`<div class="group-header"><div class="g-avatar user-av">you</div></div><div class="bubbles"><div class="bubble">${text}</div></div><div class="msg-time">${getTime()}</div>`;
   ca.appendChild(group);
   ca.scrollTop=ca.scrollHeight;
 }
 
 function showTyping(){
   const ca=document.getElementById('chatArea');
-  const wrap=document.createElement('div'); wrap.className='typing-group mira'; wrap.id='typing';
-  wrap.innerHTML=`<div class="bubbles"><div class="typing-bubble"><div class="t-dots"><div class="t-dot"></div><div class="t-dot"></div><div class="t-dot"></div></div></div></div>`;
+  const wrap=document.createElement('div'); wrap.className='typing-group'; wrap.id='typing';
+  wrap.innerHTML=`<div class="typing-inner"><div class="g-avatar">${miraAvatarSVG()}</div><div class="typing-bubble"><div class="t-dots"><div class="t-dot"></div><div class="t-dot"></div><div class="t-dot"></div></div></div></div>`;
   ca.appendChild(wrap); ca.scrollTop=ca.scrollHeight;
 }
 function hideTyping(){const el=document.getElementById('typing'); if(el)el.remove();}
@@ -304,6 +386,7 @@ function hideTyping(){const el=document.getElementById('typing'); if(el)el.remov
 async function send(){
   const inp=document.getElementById('inp'); const text=inp.value.trim();
   if(!text||busy)return;
+  document.getElementById('chips').style.display='none';
   inp.value=''; inp.style.height='auto';
   busy=true; document.getElementById('sbtn').disabled=true;
   renderUser(text);
@@ -312,12 +395,9 @@ async function send(){
     const system=BASE+'\n\nMODE:\n'+MODES[mode].extra;
     const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system,messages:history})});
     const data=await res.json();
-    if(data.error)throw new Error(data.error);
     history.push({role:'assistant',content:data.reply});
     await renderMira(data.reply);
-  }catch(e){
-    await renderMira("something went quiet on my end 🥺[BREAK]i'm still here though.");
-  }
+  }catch(e){ await renderMira("something went quiet on my end 🥺[BREAK]i'm still here though."); }
   busy=false; document.getElementById('sbtn').disabled=false;
 }
 
