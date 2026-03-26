@@ -2,35 +2,193 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>mira</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Ibarra+Real+Nova:ital,wght@1,600;1,700&family=Nunito:wght@300;400;500;600&display=swap');
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        :root { --bg: #0f0805; --gold: #e8a870; --amber: #c8783a; --cream: #f0e4d0; --border: rgba(232, 168, 112, 0.12); --mira-bubble: #1a110c; --user-bubble: rgba(232, 168, 112, 0.1); }
-        body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--cream); height: 100vh; display: flex; justify-content: center; overflow: hidden; text-transform: lowercase; }
-        .chat-container { width: 100%; max-width: 500px; height: 100vh; display: flex; flex-direction: column; background: var(--bg); }
-        .chat-header { display: flex; align-items: center; gap: 15px; padding: 25px 20px; border-bottom: 1px solid var(--border); background: rgba(15, 8, 5, 0.8); backdrop-filter: blur(10px); z-index: 10; }
-        .avatar-container { width: 55px; height: 55px; border-radius: 50%; border: 1px solid var(--gold); padding: 2px; background: linear-gradient(145deg, #1e0f08, #0f0805); display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .mira-avatar { width: 90%; height: 90%; stroke: var(--gold); stroke-width: 1.2; fill: none; opacity: 0.9; }
-        .header-info h2 { font-family: 'Ibarra Real Nova', serif; font-style: italic; font-size: 24px; color: var(--gold); letter-spacing: -0.5px; }
-        .status { font-size: 10px; color: var(--amber); letter-spacing: 1px; display: flex; align-items: center; gap: 5px; }
-        .status::before { content: ''; width: 6px; height: 6px; background: #6db87a; border-radius: 50%; display: inline-block; }
-        .chat-area { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; scroll-behavior: smooth; }
-        .chat-area::-webkit-scrollbar { width: 4px; }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        
+        :root { 
+            --bg: #0f0805; 
+            --gold: #e8a870; 
+            --amber: #c8783a; 
+            --cream: #f0e4d0; 
+            --border: rgba(232, 168, 112, 0.1); 
+            --mira-bubble: #1a110c; 
+            --user-bubble: rgba(232, 168, 112, 0.08); 
+        }
+
+        body { 
+            font-family: 'Nunito', sans-serif; 
+            background: var(--bg); 
+            color: var(--cream); 
+            height: 100vh; 
+            display: flex; 
+            justify-content: center; 
+            overflow: hidden; 
+            text-transform: lowercase; /* Mira's signature style */
+        }
+
+        .chat-container { 
+            width: 100%; 
+            max-width: 500px; 
+            height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            background: var(--bg); 
+            position: relative;
+        }
+
+        /* HEADER */
+        .chat-header { 
+            display: flex; 
+            align-items: center; 
+            gap: 15px; 
+            padding: 20px; 
+            border-bottom: 1px solid var(--border); 
+            background: rgba(15, 8, 5, 0.9);
+            backdrop-filter: blur(10px);
+            z-index: 10;
+        }
+
+        .avatar-container { 
+            width: 50px; 
+            height: 50px; 
+            border-radius: 50%; 
+            border: 1px solid var(--gold); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            background: linear-gradient(145deg, #1e0f08, #0f0805);
+        }
+
+        .mira-avatar { 
+            width: 85%; 
+            height: 85%; 
+            stroke: var(--gold); 
+            stroke-width: 1.2; 
+            fill: none; 
+        }
+
+        .header-info h2 { 
+            font-family: 'Ibarra Real Nova', serif; 
+            font-style: italic; 
+            font-size: 24px; 
+            color: var(--gold); 
+            line-height: 1;
+        }
+
+        .status { 
+            font-size: 10px; 
+            color: var(--amber); 
+            letter-spacing: 1px; 
+            display: flex; 
+            align-items: center; 
+            gap: 5px; 
+            margin-top: 4px;
+        }
+
+        .status::before { 
+            content: ''; 
+            width: 6px; 
+            height: 6px; 
+            background: #4caf50; 
+            border-radius: 50%; 
+        }
+
+        /* CHAT BOX */
+        .chat-area { 
+            flex: 1; 
+            padding: 20px; 
+            overflow-y: auto; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 12px; 
+            padding-bottom: 40px;
+        }
+
+        .chat-area::-webkit-scrollbar { width: 3px; }
         .chat-area::-webkit-scrollbar-thumb { background: var(--border); }
-        .msg { max-width: 85%; animation: fadeIn 0.4s ease forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .msg { max-width: 85%; animation: fadeIn 0.5s ease forwards; opacity: 0; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
         .mira { align-self: flex-start; }
         .user { align-self: flex-end; }
-        .bubble { padding: 14px 18px; border-radius: 20px; font-size: 16px; line-height: 1.5; font-weight: 300; }
-        .mira .bubble { background: var(--mira-bubble); border-bottom-left-radius: 4px; border: 1px solid var(--border); }
-        .user .bubble { background: var(--user-bubble); color: var(--gold); border-bottom-right-radius: 4px; }
-        .input-section { padding: 20px; background: var(--bg); display: flex; align-items: center; gap: 12px; }
-        .input-wrapper { flex: 1; background: #1a110c; border-radius: 25px; padding: 10px 20px; border: 1px solid var(--border); display: flex; align-items: center; }
-        textarea { flex: 1; background: transparent; border: none; color: var(--cream); font-family: inherit; font-size: 15px; outline: none; resize: none; height: 24px; text-transform: lowercase; }
-        .send-btn { background: none; border: none; color: var(--gold); cursor: pointer; font-size: 20px; display: flex; align-items: center; justify-content: center; }
-        .typing { font-size: 12px; color: var(--amber); margin-left: 20px; margin-bottom: 10px; opacity: 0.7; display: none; }
+
+        .bubble { 
+            padding: 14px 18px; 
+            border-radius: 22px; 
+            font-size: 16px; 
+            line-height: 1.5; 
+            font-weight: 400;
+        }
+
+        .mira .bubble { 
+            background: var(--mira-bubble); 
+            color: var(--cream);
+            border-bottom-left-radius: 4px; 
+            border: 1px solid var(--border); 
+        }
+
+        .user .bubble { 
+            background: var(--user-bubble); 
+            color: var(--gold); 
+            border-bottom-right-radius: 4px; 
+            border: 1px solid rgba(232, 168, 112, 0.05);
+        }
+
+        /* INPUT */
+        .input-section { 
+            padding: 20px; 
+            background: var(--bg); 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            border-top: 1px solid var(--border);
+        }
+
+        .input-wrapper { 
+            flex: 1; 
+            background: #1a110c; 
+            border-radius: 28px; 
+            padding: 12px 20px; 
+            border: 1px solid var(--border); 
+            display: flex; 
+            align-items: center;
+        }
+
+        textarea { 
+            flex: 1; 
+            background: transparent; 
+            border: none; 
+            color: white; 
+            outline: none; 
+            resize: none; 
+            font-family: inherit;
+            font-size: 16px;
+            max-height: 100px;
+            text-transform: lowercase;
+        }
+
+        .send-btn { 
+            background: none; 
+            border: none; 
+            color: var(--gold); 
+            cursor: pointer; 
+            font-size: 22px; 
+            display: flex; 
+            align-items: center; 
+        }
+
+        .typing-indicator { 
+            font-size: 12px; 
+            color: var(--amber); 
+            padding: 0 25px 10px; 
+            font-style: italic;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -38,27 +196,27 @@
 <div class="chat-container">
     <header class="chat-header">
         <div class="avatar-container">
-            <!-- Custom SVG Mira Avatar -->
+            <!-- Hand-drawn style SVG Avatar -->
             <svg class="mira-avatar" viewBox="0 0 100 100">
                 <path d="M50,25 Q50,10 35,10 Q20,10 20,30 Q20,55 50,80 Q80,55 80,30 Q80,10 65,10 Q50,10 50,25" stroke-opacity="0.2"/>
                 <path d="M30,35 C30,20 40,15 50,15 C60,15 70,20 70,35 C70,55 55,75 50,80 C45,75 30,55 30,35" />
-                <circle cx="50" cy="35" r="22" />
-                <path d="M35,32 Q50,28 65,32" />
-                <path d="M25,85 Q50,75 75,85 Q80,100 80,105 L20,105 Q20,100 25,85" />
+                <circle cx="50" cy="35" r="23" />
+                <path d="M38,32 Q50,28 62,32" />
+                <path d="M25,85 Q50,78 75,85 Q80,100 80,105 L20,105 Q20,100 25,85" />
             </svg>
         </div>
         <div class="header-info">
             <h2>mira</h2>
-            <div class="status">present</div>
+            <div class="status">listening</div>
         </div>
     </header>
 
     <div class="chat-area" id="chatArea"></div>
-    <div id="typing" class="typing">mira is reflecting...</div>
+    <div id="typing" class="typing-indicator">mira is reflecting...</div>
 
     <div class="input-section">
         <div class="input-wrapper">
-            <textarea id="inp" placeholder="tell me everything..." rows="1"></textarea>
+            <textarea id="inp" placeholder="speak your truth..." rows="1"></textarea>
             <button class="send-btn" onclick="send()">➤</button>
         </div>
     </div>
@@ -69,41 +227,44 @@
     const inp = document.getElementById('inp');
     const typing = document.getElementById('typing');
 
-    // Start with a warm greeting
+    // Auto-focus and Greeting
     window.onload = () => {
-        setTimeout(() => { miraSpeak("i'm here. ✨ [BREAK] tell me what's weighing on you."); }, 600);
+        setTimeout(() => { 
+            miraSpeak("i'm here. ✨ [BREAK] what is pulling at your mind today?"); 
+        }, 800);
     };
 
     async function send() {
-        const text = inp.value.trim();
-        if (!text) return;
+        const val = inp.value.trim();
+        if(!val) return;
 
-        renderMsg(text, 'user');
+        renderMsg(val, 'user');
         inp.value = '';
         typing.style.display = 'block';
+        chatArea.scrollTop = chatArea.scrollHeight;
 
         try {
             const response = await fetch('/api/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: text })
+                body: JSON.stringify({ message: val })
             });
             const data = await response.json();
             typing.style.display = 'none';
             miraSpeak(data.reply);
         } catch (err) {
             typing.style.display = 'none';
-            miraSpeak("my connection is a bit frayed. let's try that again. 🧡");
+            miraSpeak("i lost my thread for a moment. ✨ [BREAK] please, tell me again.");
         }
     }
 
-    function miraSpeak(fullText) {
-        const bubbles = fullText.split('[BREAK]');
-        bubbles.forEach((text, i) => {
+    function miraSpeak(text) {
+        const parts = text.split('[BREAK]');
+        parts.forEach((p, i) => {
             setTimeout(() => {
-                renderMsg(text.trim(), 'mira');
+                renderMsg(p.trim(), 'mira');
                 chatArea.scrollTop = chatArea.scrollHeight;
-            }, i * 1000);
+            }, i * 1100);
         });
     }
 
@@ -115,7 +276,12 @@
         chatArea.scrollTop = chatArea.scrollHeight;
     }
 
-    inp.addEventListener("keypress", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } });
+    inp.addEventListener('keydown', (e) => {
+        if(e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            send();
+        }
+    });
 </script>
 </body>
 </html>
