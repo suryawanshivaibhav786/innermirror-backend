@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mira</title>
 <style>
-/* --- TYPOGRAPHY --- */
-@import url('https://fonts.googleapis.com/css2?family=Ibarra+Real+Nova:ital,wght@1,500;1,600;1,700&family=Nunito:wght@300;400;500;600&display=swap');
+/* --- TYPOGRAPHY: Elegant & Bold --- */
+@import url('https://fonts.googleapis.com/css2?family=Ibarra+Real+Nova:ital,wght@1,600;1,700&family=Nunito:wght@300;400;500;600&display=swap');
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -37,49 +37,51 @@ canvas#bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer
 }
 .screen.hidden { opacity: 0; pointer-events: none; transform: translateY(30px); }
 
-/* --- LANDING --- */
+/* --- LANDING UI --- */
 #welcome { padding: 40px 20px; text-align: center; max-width: 420px; width: 100%; }
 
 .mira-portrait-wrap {
-  width: 200px; height: 200px;
-  margin: 0 auto 35px;
+  width: 210px; height: 210px;
+  margin: 0 auto 30px;
   border-radius: 50%;
-  border: 2.5px solid var(--gold);
+  border: 2px solid var(--gold);
   overflow: hidden;
   background: #1e0f08;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.7), 0 0 25px rgba(200, 120, 58, 0.25);
+  box-shadow: 0 15px 45px rgba(0,0,0,0.8), 0 0 30px rgba(200, 120, 58, 0.2);
 }
 
 .mira-portrait-wrap img { width: 100%; height: 100%; object-fit: cover; }
 
 .mira-name { 
   font-family: 'Ibarra Real Nova', serif; 
-  font-style: italic; font-size: 64px; font-weight: 700;
-  color: var(--gold); margin-bottom: 45px; letter-spacing: -2px;
+  font-style: italic; font-size: 68px; font-weight: 700;
+  color: var(--gold); margin-bottom: 40px; letter-spacing: -3px;
+  text-shadow: 0 4px 10px rgba(0,0,0,0.5);
 }
 
 .mcard {
   width: 100%; padding: 22px; border-radius: 16px;
   border: 1px solid var(--border);
-  background: rgba(30, 15, 8, 0.8);
+  background: rgba(30, 15, 8, 0.85);
   cursor: pointer; margin-bottom: 14px;
   transition: all 0.4s ease;
   backdrop-filter: blur(15px);
   font-family: 'Ibarra Real Nova', serif;
-  font-style: italic; font-size: 20px; color: var(--cream-dim);
+  font-style: italic; font-size: 21px; color: var(--cream-dim);
 }
-.mcard:hover { border-color: var(--gold); background: rgba(45, 25, 15, 0.95); transform: translateY(-5px); color: var(--gold); }
+.mcard:hover { border-color: var(--gold); background: rgba(45, 25, 15, 0.98); transform: translateY(-5px); color: var(--gold); }
 
-/* --- CHAT --- */
+/* --- CHAT UI --- */
 #chatscreen { width: 100%; max-width: 700px; height: 100vh; display: flex; flex-direction: column; }
+
 .chat-header {
-  padding: 20px 25px; display: flex; align-items: center; justify-content: space-between;
+  padding: 15px 25px; display: flex; align-items: center; justify-content: space-between;
   background: rgba(19, 10, 6, 0.98); border-bottom: 1px solid var(--border); backdrop-filter: blur(25px);
 }
 .h-identity { display: flex; align-items: center; gap: 15px; }
-.h-avatar { width: 48px; height: 48px; border-radius: 50%; overflow: hidden; border: 1.5px solid var(--gold); }
+.h-avatar { width: 50px; height: 50px; border-radius: 50%; overflow: hidden; border: 1.5px solid var(--gold); }
 .h-avatar img { width: 100%; height: 100%; object-fit: cover; }
-.h-name { font-family: 'Ibarra Real Nova', serif; font-style: italic; font-size: 26px; color: var(--gold); }
+.h-name { font-family: 'Ibarra Real Nova', serif; font-style: italic; font-size: 28px; color: var(--gold); }
 
 .chat-area { flex: 1; overflow-y: auto; padding: 30px; display: flex; flex-direction: column; gap: 20px; }
 .msg { display: flex; flex-direction: column; max-width: 82%; }
@@ -87,20 +89,21 @@ canvas#bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer
 .msg.user { align-self: flex-end; align-items: flex-end; }
 .bubble { padding: 16px 22px; border-radius: 22px; font-size: 16px; line-height: 1.6; }
 .msg.mira .bubble { background: #261812; border: 1px solid rgba(200, 120, 58, 0.1); color: var(--cream-dim); border-top-left-radius: 4px; }
-.msg.user .bubble { background: rgba(200, 120, 58, 0.18); color: var(--cream); border-top-right-radius: 4px; }
+.msg.user .bubble { background: rgba(200, 120, 58, 0.22); color: var(--cream); border-top-right-radius: 4px; }
 
-/* Typing indicator dots */
+/* Typing animation */
 .t-dots { display: flex; gap: 6px; padding: 12px; }
 .t-dot { width: 7px; height: 7px; background: var(--gold); border-radius: 50%; opacity: 0.3; animation: blink 1.4s infinite; }
-.t-dot:nth-child(2) { animation-delay: 0.2s; } .t-dot:nth-child(3) { animation-delay: 0.4s; }
+.t-dot:nth-child(2) { animation-delay: 0.2s; }
+.t-dot:nth-child(3) { animation-delay: 0.4s; }
 @keyframes blink { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
 
-.input-section { padding: 25px; background: rgba(19, 10, 6, 0.98); border-top: 1px solid var(--border); }
-.ibox { display: flex; gap: 15px; align-items: flex-end; background: #1a0d07; border: 1px solid var(--border); border-radius: 35px; padding: 14px 14px 14px 28px; }
+.input-section { padding: 20px 25px 35px; background: rgba(19, 10, 6, 0.98); border-top: 1px solid var(--border); }
+.ibox { display: flex; gap: 15px; align-items: flex-end; background: #1a0d07; border: 1px solid var(--border); border-radius: 35px; padding: 12px 12px 12px 28px; }
 textarea { flex: 1; background: transparent; border: none; outline: none; color: var(--cream); font-size: 16px; line-height: 1.5; resize: none; max-height: 140px; }
-.btn-send { width: 48px; height: 48px; border-radius: 50%; background: var(--amber); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-.btn-send svg { fill: white; width: 22px; height: 22px; }
-.btn-back { background: transparent; border: 1px solid var(--border); color: var(--cream-muted); padding: 8px 18px; border-radius: 25px; font-size: 12px; cursor: pointer; }
+.btn-send { width: 46px; height: 46px; border-radius: 50%; background: var(--amber); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.btn-send svg { fill: white; width: 20px; height: 20px; }
+.btn-back { background: transparent; border: 1px solid var(--border); color: var(--cream-dim); padding: 8px 18px; border-radius: 25px; font-size: 11px; cursor: pointer; font-weight: 600; letter-spacing: 1px; }
 </style>
 </head>
 <body>
@@ -108,7 +111,7 @@ textarea { flex: 1; background: transparent; border: none; outline: none; color:
 
 <div class="screen" id="welcome">
   <div class="mira-portrait-wrap">
-    <img src="https://i.ibb.co/L5Z4D1C/mira-art.png" alt="Mira">
+    <img src="https://i.postimg.cc/jdTf7xsv/AZ0li-YNpf-4AE4-M0xzpg-AZ0li-YNp-A9D7Ih-Vp-Jdy4w.png" alt="Mira">
   </div>
   <h1 class="mira-name">mira</h1>
   <div class="mcards">
@@ -121,18 +124,20 @@ textarea { flex: 1; background: transparent; border: none; outline: none; color:
 <div class="screen hidden" id="chatscreen">
   <header class="chat-header">
     <div class="h-identity">
-      <div class="h-avatar"><img src="https://i.ibb.co/L5Z4D1C/mira-art.png" alt="Mira"></div>
+      <div class="h-avatar">
+        <img src="https://i.postimg.cc/jdTf7xsv/AZ0li-YNpf-4AE4-M0xzpg-AZ0li-YNp-A9D7Ih-Vp-Jdy4w.png" alt="Mira Avatar">
+      </div>
       <div>
         <div class="h-name">mira</div>
-        <div style="font-size:11px; color:#6db87a; font-weight:600;">ONLINE</div>
+        <div style="font-size:10px; color:#6db87a; font-weight:700; letter-spacing:1px;">ONLINE</div>
       </div>
     </div>
-    <button class="btn-back" onclick="goHome()">← CHANGE</button>
+    <button class="btn-back" onclick="goHome()">CHANGE</button>
   </header>
   <main class="chat-area" id="chatArea"></main>
   <footer class="input-section">
     <div class="ibox">
-      <textarea id="inp" placeholder="Talk to Mira..." rows="1" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+      <textarea id="inp" placeholder="Message Mira..." rows="1" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
       <button class="btn-send" onclick="send()">
         <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
       </button>
@@ -141,27 +146,27 @@ textarea { flex: 1; background: transparent; border: none; outline: none; color:
 </div>
 
 <script>
-/* STAR BACKGROUND ENGINE */
+/* --- STAR ENGINE --- */
 (function(){
   const c=document.getElementById('bg'),ctx=c.getContext('2d');
   let W,H,stars=[];
-  function init(){W=c.width=window.innerWidth;H=c.height=window.innerHeight;stars=Array.from({length:80},()=>({x:Math.random()*W,y:Math.random()*H,r:Math.random()*0.8+0.2,o:Math.random(),v:Math.random()*0.001+0.0005}));}
+  function init(){W=c.width=window.innerWidth;H=c.height=window.innerHeight;stars=Array.from({length:85},()=>({x:Math.random()*W,y:Math.random()*H,r:Math.random()*0.8+0.2,o:Math.random(),v:Math.random()*0.001+0.0005}));}
   function draw(){ctx.clearRect(0,0,W,H);stars.forEach(s=>{const a=0.1+Math.abs(Math.sin(Date.now()*s.v+s.o)*0.3);ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fillStyle=`rgba(240,225,200,${a})`;ctx.fill();});requestAnimationFrame(draw);}
   window.addEventListener('resize',init);init();draw();
 })();
 
-/* HUMAN-FIRST EQ PROMPT */
+/* --- HUMAN EQ PROMPT --- */
 const SYSTEM = `You are Mira. You are a mature, grounded, and intuitive friend. You don't sound like a therapist or a textbook; you sound like a wise woman who has lived many lives and understands the messy things people do.
 INTERNAL LOGIC:
-- Speak about 'nerves' instead of 'biology'.
-- Speak about 'reacting vs responding' instead of 'systems'.
-- Speak about 'ego' or 'insecurity' instead of 'shadow motives'.
+- Speak about 'nerves' or 'feelings' instead of 'biology'.
+- Speak about 'reacting vs responding' instead of 'cognitive systems'.
+- Speak about 'ego' or 'feeling small' instead of 'shadow motives'.
 RULES:
-1. Mirror their feeling first.
+1. Mirror their feeling first so they feel heard.
 2. strictly lowercase.
-3. short sentences.
+3. short, simple sentences.
 4. use [BREAK] for multiple bubbles.
-5. give the winning strategic move.`;
+5. give a clear, winning strategic move to handle the situation.`;
 
 let history=[], busy=false;
 
@@ -174,7 +179,7 @@ async function renderMira(text){
     const d=document.createElement('div'); d.id='typing'; d.className='msg mira';
     d.innerHTML='<div class="t-dots"><div class="t-dot"></div><div class="t-dot"></div><div class="t-dot"></div></div>';
     ca.appendChild(d); ca.scrollTop=ca.scrollHeight;
-    await new Promise(r=>setTimeout(r, 1400 + p.length*15));
+    await new Promise(r=>setTimeout(r, 1500 + p.length*15));
     d.remove();
     const g=document.createElement('div'); g.className='msg mira';
     g.innerHTML=`<div class="bubble">${p.toLowerCase()}</div>`;
@@ -196,7 +201,7 @@ async function send(){
     const data = await res.json();
     history.push({role:'assistant',content:data.reply});
     await renderMira(data.reply);
-  } catch(e) { await renderMira("i'm right here. ✨"); }
+  } catch(e) { await renderMira("i'm right here. take a breath with me. ✨"); }
   busy=false;
 }
 
@@ -204,7 +209,7 @@ function startChat(m){
   history=[]; document.getElementById('welcome').classList.add('hidden');
   document.getElementById('chatscreen').classList.remove('hidden');
   document.getElementById('chatArea').innerHTML='';
-  renderMira(m==='talk' ? "i'm listening. what's on your mind? ✨" : "i'm ready. let's figure it out together. 🕊️");
+  renderMira(m==='talk' ? "i'm listening. what's on your mind? ✨" : "i'm here. tell me the situation and let's find the wisdom in it. 🕊️");
 }
 </script>
 </body>
