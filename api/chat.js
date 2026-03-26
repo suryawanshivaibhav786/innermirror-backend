@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mira</title>
 <style>
-/* --- PREMIUM TYPOGRAPHY --- */
+/* --- TYPOGRAPHY --- */
 @import url('https://fonts.googleapis.com/css2?family=Ibarra+Real+Nova:ital,wght@1,600;1,700&family=Nunito:wght@300;400;500;600&display=swap');
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -104,7 +104,7 @@ textarea { flex: 1; background: transparent; border: none; outline: none; color:
 
 <div class="screen" id="welcome">
   <div class="mira-portrait-frame">
-    <img src="https://i.postimg.cc/9F3Nv7ck/Gemini-Generated-Image-slx6cdslx6cdslx6.png" alt="Mira Portrait">
+    <img src="https://i.postimg.cc/9F3Nv7ck/Gemini-Generated-Image-slx6cdslx6cdslx6.png?v=2" alt="Mira">
   </div>
   <h1 class="mira-name">mira</h1>
   <div class="mcard" onclick="startChat('talk')">talk</div>
@@ -115,7 +115,7 @@ textarea { flex: 1; background: transparent; border: none; outline: none; color:
   <header class="chat-header">
     <div class="h-identity">
       <div class="h-avatar">
-        <img src="https://i.postimg.cc/9F3Nv7ck/Gemini-Generated-Image-slx6cdslx6cdslx6.png" alt="Mira Avatar">
+        <img src="https://i.postimg.cc/9F3Nv7ck/Gemini-Generated-Image-slx6cdslx6cdslx6.png?v=2" alt="Mira Avatar">
       </div>
       <div>
         <div class="h-name">mira</div>
@@ -133,7 +133,6 @@ textarea { flex: 1; background: transparent; border: none; outline: none; color:
 </div>
 
 <script>
-/* STAR BACKGROUND ENGINE */
 (function(){
   const c=document.getElementById('bg'),ctx=c.getContext('2d');
   let W,H,stars=[];
@@ -142,24 +141,20 @@ textarea { flex: 1; background: transparent; border: none; outline: none; color:
   window.addEventListener('resize',init);init();draw();
 })();
 
-const SYSTEM = `You are Mira. Wise, grounded, mature. strictly lowercase. short sentences. give strategic advice. use [BREAK] for multiple bubbles.`;
+const SYSTEM = `You are Mira. Wise friend. lowercase. short sentences. give strategic moves.`;
 let history=[], busy=false;
 
 function startChat(mode){
   document.getElementById('welcome').classList.add('hidden');
   document.getElementById('chatscreen').classList.remove('hidden');
-  renderMira("i'm listening. what's on your mind? ✨");
+  renderMira("i'm here. what's on your mind? ✨");
 }
 
 async function renderMira(text){
   const ca=document.getElementById('chatArea');
-  const parts=text.split('[BREAK]').map(p=>p.trim()).filter(Boolean);
-  for(let p of parts){
-    const g=document.createElement('div'); g.className='msg mira';
-    g.innerHTML=`<div class="bubble">${p.toLowerCase()}</div>`;
-    ca.appendChild(g); ca.scrollTop=ca.scrollHeight;
-    await new Promise(r=>setTimeout(r, 600));
-  }
+  const g=document.createElement('div'); g.className='msg mira';
+  g.innerHTML=`<div class="bubble">${text.toLowerCase()}</div>`;
+  ca.appendChild(g); ca.scrollTop=ca.scrollHeight;
 }
 
 async function send(){
@@ -169,7 +164,6 @@ async function send(){
   const g=document.createElement('div'); g.className='msg user';
   g.innerHTML=`<div class="bubble">${val}</div>`;
   document.getElementById('chatArea').appendChild(g);
-  // Add API fetch here as needed
   busy=false;
 }
 </script>
