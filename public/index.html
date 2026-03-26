@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mira · InnerMirror</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500;1,700&family=Nunito:wght@300;400;500;600&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f0804;
+  --surface:#1a0e08;
+  --surface2:#251408;
+  --amber:#c8783a;
+  --amber-light:#e8a870;
+  --gold:#d4a055;
+  --gold-light:#f0c880;
+  --cream:#f0e4d0;
+  --cream-dim:#c8b49a;
+  --cream-muted:#8a7464;
+  --green:#6db87a;
+  --border:rgba(200,120,58,0.14);
+  --border-bright:rgba(212,160,85,0.3);
+  --mira-bubble:rgba(35,18,10,0.95);
+  --user-bubble:rgba(150,75,35,0.15);
+  --purple-deep:#2a1a3e;
+}
+html,body{height:100%;overflow:hidden;}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--cream);display:flex;align-items:stretch;justify-content:center;}
+
+/* ── BACKGROUND CANVAS ── */
+canvas#bg{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;}
+
+/* ── MODE SELECT OVERLAY ── */
+#modeSelect{
+  position:fixed;inset:0;z-index:10;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(15,8,4,0.92);
+  backdrop-filter:blur(8px);
+  transition:opacity 0.5s ease;
+}
+#modeSelect.hidden{opacity:0;pointer-events:none;}
+
+.mode-panel{
+  text-align:center;
+  max-width:400px;width:100%;
+  padding:32px 24px;
+}
+
+/* Gold line-art Mira avatar — large */
+.mira-avatar-lg{
+  width:110px;height:110px;
+  margin:0 auto 18px;
+  position:relative;
+  animation:floatAvatar 5s ease-in-out infinite;
+}
+@keyframes floatAvatar{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+
+.avatar-halo{
+  position:absolute;inset:-14px;border-radius:50%;
+  background:radial-gradient(circle,rgba(212,160,85,0.22) 0%,transparent 68%);
+  animation:haloPulse 3.5s ease-in-out infinite;
+}
+@keyframes haloPulse{0%,100%{opacity:0.6;transform:scale(1)}50%{opacity:1;transform:scale(1.1)}}
+
+.avatar-circle{
+  width:110px;height:110px;border-radius:50%;
+  background:var(--purple-deep);
+  border:1.5px solid rgba(212,160,85,0.35);
+  overflow:hidden;
+  position:relative;z-index:1;
+  box-shadow:0 0 30px rgba(212,160,85,0.15),inset 0 0 20px rgba(42,26,62,0.5);
+}
+
+.mode-brand{
+  font-family:'Playfair Display',serif;
+  font-size:26px;color:var(--cream);
+  letter-spacing:-0.2px;margin-bottom:2px;
+}
+.mode-brand em{font-style:italic;color:var(--gold-light)}
+.mode-hello{font-size:13px;color:var(--cream-muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px;}
+.mode-tagline{font-size:13px;color:rgba(200,180,155,0.5);font-style:italic;font-weight:300;margin-bottom:26px;}
+.mode-q{
+  font-family:'Playfair Display',serif;
+  font-size:17px;color:rgba(230,205,175,0.75);
+  font-style:italic;margin-bottom:22px;line-height:1.55;
+}
+
+.mcards{display:flex;flex-direction:column;gap:8px;width:100%;}
+.mcard{
+  padding:13px 16px;border-radius:14px;
+  border:1px solid var(--border);
+  background:rgba(26,14,8,0.75);
+  cursor:pointer;text-align:left;
+  display:flex;align-items:center;gap:13px;
+  transition:all 0.26s;backdrop-filter:blur(8px);
+}
+.mcard:hover{border-color:var(--border-bright);background:rgba(37,20,8,0.9);transform:translateX(5px);}
+.mc-icon{width:33px;height:33px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.mcard:nth-child(1) .mc-icon{background:rgba(200,120,58,0.16)}
+.mcard:nth-child(2) .mc-icon{background:rgba(130,90,180,0.16)}
+.mcard:nth-child(3) .mc-icon{background:rgba(70,130,180,0.16)}
+.mc-t{font-size:13px;color:var(--cream-dim);font-weight:600;margin-bottom:1px;}
+.mc-h{font-size:11px;color:var(--cream-muted);font-weight:300;}
+
+/* ── CHAT APP ── */
+#app{
+  width:100%;max-width:600px;
+  height:100vh;
+  display:flex;flex-direction:column;
+  position:relative;z-index:2;
+}
+
+/* Header */
+.chat-header{
+  padding:11px 18px;
+  display:flex;align-items:center;justify-content:space-between;
+  flex-shrink:0;
+  background:rgba(15,8,4,0.88);
+  border-bottom:1px solid var(--border);
+  backdrop-filter:blur(20px);
+}
+.h-left{display:flex;align-items:center;gap:11px}
+
+/* Small header avatar */
+.h-avatar-wrap{width:40px;height:40px;position:relative;flex-shrink:0;}
+.h-avatar-circle{
+  width:40px;height:40px;border-radius:50%;
+  background:var(--purple-deep);
+  border:1.5px solid rgba(212,160,85,0.3);
+  overflow:hidden;
+  box-shadow:0 0 14px rgba(212,160,85,0.12);
+}
+.h-online{position:absolute;bottom:1px;right:1px;width:9px;height:9px;border-radius:50%;background:var(--green);border:1.5px solid var(--bg);animation:blink 2.5s ease infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.4}}
+
+.h-name{font-family:'Playfair Display',serif;font-size:16px;color:var(--cream);font-style:italic;line-height:1;margin-bottom:2px;}
+.h-status{font-size:10.5px;color:var(--green);font-weight:400;}
+
+.h-mode-btn{
+  font-size:10.5px;padding:4px 12px;border-radius:20px;
+  border:1px solid var(--border);color:var(--cream-muted);
+  cursor:pointer;background:transparent;font-family:'Nunito',sans-serif;
+  transition:all 0.2s;
+}
+.h-mode-btn:hover{border-color:var(--gold);color:var(--gold-light)}
+
+/* Chat area */
+.chat-area{
+  flex:1;overflow-y:auto;
+  padding:16px 18px 8px;
+  display:flex;flex-direction:column;
+  scrollbar-width:thin;
+  scrollbar-color:rgba(200,120,58,0.1) transparent;
+}
+.chat-area::-webkit-scrollbar{width:3px}
+.chat-area::-webkit-scrollbar-thumb{background:rgba(200,120,58,0.1);border-radius:2px}
+
+.date-tag{
+  text-align:center;font-size:10px;color:var(--cream-muted);
+  background:rgba(37,20,8,0.6);border:1px solid var(--border);
+  border-radius:20px;padding:3px 12px;width:fit-content;
+  margin:8px auto 16px;font-weight:400;letter-spacing:0.3px;
+}
+
+/* Message groups */
+.msg-group{display:flex;flex-direction:column;margin-bottom:14px;}
+.msg-group.mira{align-items:flex-start;}
+.msg-group.user{align-items:flex-end;}
+
+.group-header{display:flex;align-items:center;gap:8px;margin-bottom:5px;}
+.msg-group.user .group-header{flex-direction:row-reverse;}
+
+.g-avatar{width:26px;height:26px;border-radius:50%;overflow:hidden;flex-shrink:0;}
+.g-avatar-circle{
+  width:26px;height:26px;border-radius:50%;
+  background:var(--purple-deep);
+  border:1px solid rgba(212,160,85,0.25);
+  overflow:hidden;
+}
+.g-avatar.user-av{
+  background:rgba(150,75,35,0.3);
+  border:1px solid rgba(200,120,58,0.18);
+  display:flex;align-items:center;justify-content:center;
+  font-size:9px;color:var(--amber-light);font-weight:700;
+  width:26px;height:26px;border-radius:50%;
+}
+.g-name{font-size:10.5px;color:var(--cream-muted);font-weight:500;}
+
+.bubbles{display:flex;flex-direction:column;gap:3px;max-width:80%;}
+.msg-group.user .bubbles{align-items:flex-end;}
+
+.bubble{
+  padding:10px 15px;
+  border-radius:18px;
+  font-size:14.5px;
+  line-height:1.62;
+  font-weight:400;
+  animation:bRise 0.38s cubic-bezier(0.22,1,0.36,1);
+  word-break:break-word;
+}
+@keyframes bRise{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+
+.msg-group.mira .bubble{
+  background:linear-gradient(150deg,rgba(40,20,12,0.97) 0%,rgba(28,14,8,0.93) 100%);
+  border:1px solid rgba(212,160,85,0.12);
+  color:var(--cream-dim);
+  border-top-left-radius:3px;
+}
+.msg-group.mira .bubbles .bubble:not(:first-child){border-top-left-radius:3px;border-bottom-left-radius:3px;}
+.msg-group.mira .bubbles .bubble:last-child{border-bottom-left-radius:18px;}
+
+.msg-group.user .bubble{
+  background:rgba(160,80,38,0.14);
+  border:1px solid rgba(200,120,58,0.18);
+  color:var(--cream);
+  border-top-right-radius:3px;
+}
+
+.msg-time{font-size:9.5px;color:var(--cream-muted);opacity:0.45;margin-top:4px;padding:0 3px;}
+.msg-group.user .msg-time{text-align:right;}
+
+/* Typing */
+.typing-group{display:flex;flex-direction:column;align-items:flex-start;margin-bottom:10px;}
+.typing-inner{display:flex;align-items:center;gap:8px;}
+.typing-bubble{
+  padding:11px 18px;
+  background:linear-gradient(150deg,rgba(40,20,12,0.97),rgba(28,14,8,0.93));
+  border:1px solid rgba(212,160,85,0.1);
+  border-radius:3px 18px 18px 18px;
+}
+.t-dots{display:flex;gap:4px;}
+.t-dot{width:5px;height:5px;border-radius:50%;background:var(--gold);opacity:0.35;animation:tdot 1.5s ease infinite;}
+.t-dot:nth-child(2){animation-delay:0.22s}.t-dot:nth-child(3){animation-delay:0.44s}
+@keyframes tdot{0%,60%,100%{opacity:0.18;transform:scale(0.7)}30%{opacity:0.85;transform:scale(1)}}
+
+/* Input */
+.input-section{
+  flex-shrink:0;padding:10px 18px 14px;
+  background:rgba(15,8,4,0.92);
+  border-top:1px solid var(--border);
+  backdrop-filter:blur(20px);
+}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:9px;}
+.chip{
+  font-size:11.5px;padding:5px 13px;border-radius:20px;
+  background:rgba(26,14,8,0.8);border:1px solid var(--border);
+  color:var(--cream-muted);cursor:pointer;
+  font-family:'Nunito',sans-serif;font-weight:400;transition:all 0.2s;
+}
+.chip:hover{border-color:var(--gold);color:var(--gold-light);background:rgba(37,20,8,0.9);}
+.ibox{
+  display:flex;gap:10px;align-items:flex-end;
+  background:rgba(26,14,8,0.88);
+  border:1px solid var(--border);
+  border-radius:24px;
+  padding:9px 9px 9px 18px;
+  transition:border-color 0.3s;
+}
+.ibox:focus-within{border-color:rgba(212,160,85,0.35);}
+textarea{
+  flex:1;background:transparent;border:none;outline:none;
+  color:var(--cream);font-family:'Nunito',sans-serif;
+  font-size:14.5px;font-weight:400;line-height:1.5;
+  resize:none;min-height:22px;max-height:110px;
+}
+textarea::placeholder{color:rgba(138,116,100,0.4)}
+.send-btn{
+  width:36px;height:36px;border-radius:50%;
+  background:linear-gradient(135deg,var(--gold-light),#a05818);
+  box-shadow:0 2px 14px rgba(212,160,85,0.3);
+  border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;transition:all 0.2s;
+}
+.send-btn:hover{transform:scale(1.09);box-shadow:0 4px 20px rgba(212,160,85,0.45)}
+.send-btn:active{transform:scale(0.93)}
+.send-btn:disabled{opacity:0.28;cursor:not-allowed;transform:none;box-shadow:none}
+.send-btn svg{width:15px;height:15px;fill:white;margin-left:1px;}
+.fnote{text-align:center;font-size:10px;color:rgba(138,116,100,0.25);margin-top:7px;}
+</style>
+</head>
+<body>
+<canvas id="bg"></canvas>
+
+<!-- MODE SELECT OVERLAY -->
+<div id="modeSelect">
+  <div class="mode-panel">
+    <div class="mira-avatar-lg">
+      <div class="avatar-halo"></div>
+      <div class="avatar-circle" id="avatarLg"></div>
+    </div>
+    <div class="mode-brand">inner<em>mirror</em></div>
+    <div class="mode-hello">meet mira</div>
+    <div class="mode-tagline">your warm, emotionally intelligent companion</div>
+    <div class="mode-q">"What's on your heart today?"</div>
+    <div class="mcards">
+      <div class="mcard" onclick="startChat('feel')">
+        <div class="mc-icon">🌙</div>
+        <div><div class="mc-t">I just need to talk</div><div class="mc-h">No agenda. Just someone who gets it.</div></div>
+      </div>
+      <div class="mcard" onclick="startChat('understand')">
+        <div class="mc-icon">🔍</div>
+        <div><div class="mc-t">Help me understand them</div><div class="mc-h">Their behavior is confusing or hurting you.</div></div>
+      </div>
+      <div class="mcard" onclick="startChat('words')">
+        <div class="mc-icon">💬</div>
+        <div><div class="mc-t">I don't know what to say</div><div class="mc-h">You feel it. The words just won't come.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CHAT APP — always mounted, visible behind overlay -->
+<div id="app">
+  <div class="chat-header">
+    <div class="h-left">
+      <div class="h-avatar-wrap">
+        <div class="h-avatar-circle" id="avatarSm"></div>
+        <div class="h-online"></div>
+      </div>
+      <div>
+        <div class="h-name">Mira</div>
+        <div class="h-status" id="statusText">online • here with you</div>
+      </div>
+    </div>
+    <button class="h-mode-btn" onclick="showModeSelect()">← change</button>
+  </div>
+
+  <div class="chat-area" id="chatArea">
+    <div class="date-tag">Today</div>
+  </div>
+
+  <div class="input-section">
+    <div class="chips" id="chips"></div>
+    <div class="ibox">
+      <textarea id="inp" placeholder="Message Mira…" rows="1" onkeydown="onKey(event)" oninput="resize(this)"></textarea>
+      <button class="send-btn" id="sbtn" onclick="send()">
+        <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+      </button>
+    </div>
+    <div class="fnote">Mira is a companion, not a therapist. In a crisis, please reach out to a professional.</div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════
+   BACKGROUND — warm amber nebula
+═══════════════════════════════ */
+(function(){
+  const c=document.getElementById('bg'),ctx=c.getContext('2d');
+  let W,H,t=0,stars=null;
+  function init(){W=c.width=window.innerWidth;H=c.height=window.innerHeight;stars=null;}
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    if(!stars)stars=Array.from({length:100},()=>({
+      x:Math.random()*W,y:Math.random()*H,
+      r:Math.random()*0.85+0.1,
+      o:Math.random()*0.3+0.05,
+      s:Math.random()*0.005+0.001,
+      p:Math.random()*Math.PI*2
+    }));
+    stars.forEach(s=>{
+      const o=s.o+Math.sin(t*s.s+s.p)*0.1;
+      ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(240,210,165,${o})`;ctx.fill();
+    });
+    // warm nebula blobs
+    [
+      [W*0.12,H*0.25,W*0.38,160,90,40,0.0007],
+      [W*0.85,H*0.72,W*0.32,140,70,25,0.0009],
+      [W*0.5,H*0.92,W*0.28,180,100,50,0.0006],
+      [W*0.7,H*0.15,W*0.2,120,60,30,0.001]
+    ].forEach(([x,y,r,rr,gg,bb,sp])=>{
+      const g=ctx.createRadialGradient(x,y,0,x,y,r);
+      g.addColorStop(0,`rgba(${rr},${gg},${bb},${0.055+Math.sin(t*sp)*0.022})`);
+      g.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+    });
+    t++;requestAnimationFrame(draw);
+  }
+  window.addEventListener('resize',init);init();draw();
+})();
+
+/* ═══════════════════════════════
+   GOLD LINE-ART MIRA AVATAR SVG
+   Inspired by the provided image:
+   side-profile, minimal gold lines,
+   deep purple bg, star detail
+═══════════════════════════════ */
+function miraSVG(size){
+  const s=size||96;
+  return `<svg viewBox="0 0 100 100" width="${s}" height="${s}" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="bgMira" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#2a1a3e"/>
+      <stop offset="100%" stop-color="#150d22"/>
+    </radialGradient>
+    <linearGradient id="goldLine" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f0c870"/>
+      <stop offset="50%" stop-color="#d4a055"/>
+      <stop offset="100%" stop-color="#b07830"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="0.8" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <circle cx="50" cy="50" r="50" fill="url(#bgMira)"/>
+
+  <!-- Subtle inner glow -->
+  <circle cx="50" cy="50" r="48" fill="none" stroke="rgba(212,160,85,0.08)" stroke-width="1"/>
+
+  <g filter="url(#glow)" stroke="url(#goldLine)" stroke-linecap="round" stroke-linejoin="round" fill="none">
+
+    <!-- Neck and shoulder base -->
+    <path d="M44 82 Q43 88 42 95" stroke-width="1.4"/>
+    <path d="M56 82 Q57 88 58 95" stroke-width="1.4"/>
+    <path d="M35 92 Q44 88 50 87 Q56 88 65 92" stroke-width="1.3"/>
+
+    <!-- Shoulders -->
+    <path d="M25 95 Q32 84 42 80 Q50 78 58 80 Q68 84 75 95" stroke-width="1.4"/>
+
+    <!-- Face outline — side slightly turned, soft -->
+    <path d="M38 72 Q34 65 33 57 Q32 49 34 42 Q36 33 42 27 Q48 22 55 22 Q63 23 67 29 Q71 35 70 44 Q69 53 65 60 Q61 67 56 72 Q52 76 46 76 Q41 76 38 72Z" stroke-width="1.6"/>
+
+    <!-- Hair — flowing back ponytail style -->
+    <path d="M42 22 Q38 16 36 10 Q38 8 42 10 Q44 14 44 20" stroke-width="1.3"/>
+    <path d="M55 22 Q60 14 64 8 Q68 10 66 16 Q63 20 60 23" stroke-width="1.3"/>
+    <!-- Top of hair sweep -->
+    <path d="M38 24 Q44 16 54 16 Q62 17 67 24" stroke-width="1.6"/>
+    <!-- Hair flow to back -->
+    <path d="M67 24 Q74 30 76 40 Q77 50 74 60 Q72 68 68 74" stroke-width="1.5"/>
+    <path d="M68 74 Q72 80 70 88 Q68 92 64 94" stroke-width="1.3"/>
+    <!-- Loose strand -->
+    <path d="M38 24 Q34 30 33 38" stroke-width="1.1" opacity="0.7"/>
+
+    <!-- Ear -->
+    <path d="M33 52 Q30 54 30 58 Q31 62 34 63" stroke-width="1.2"/>
+    <!-- Earring -->
+    <circle cx="31" cy="64" r="2" stroke-width="1.2"/>
+    <line x1="31" y1="66" x2="31" y2="70" stroke-width="1.1"/>
+
+    <!-- Eye — closed/downcast, feminine lashes -->
+    <path d="M42 43 Q47 40 52 42" stroke-width="1.3"/>
+    <!-- Eyelid -->
+    <path d="M41 44 Q47 46 53 44" stroke-width="1.1" opacity="0.6"/>
+    <!-- Lashes -->
+    <line x1="43" y1="42" x2="42" y2="39" stroke-width="1"/>
+    <line x1="47" y1="41" x2="47" y2="38" stroke-width="1"/>
+    <line x1="51" y1="42" x2="52" y2="39" stroke-width="1"/>
+
+    <!-- Eyebrow -->
+    <path d="M40 39 Q46 36 53 38" stroke-width="1.2"/>
+
+    <!-- Nose — delicate -->
+    <path d="M50 44 Q49 52 47 55 Q49 57 52 56" stroke-width="1.1"/>
+
+    <!-- Lips — soft smile -->
+    <path d="M42 64 Q46 61 50 62 Q54 61 58 64" stroke-width="1.3"/>
+    <path d="M43 64 Q50 68 57 64" stroke-width="1.2"/>
+    <!-- Cupid bow -->
+    <path d="M46 62 Q50 60 54 62" stroke-width="1" opacity="0.7"/>
+
+    <!-- Cheekbone highlight -->
+    <path d="M36 53 Q38 51 41 52" stroke-width="0.9" opacity="0.5"/>
+
+    <!-- Star detail on cheek (like the reference image) -->
+    <g opacity="0.85">
+      <line x1="58" y1="54" x2="58" y2="58" stroke-width="1.1"/>
+      <line x1="56" y1="56" x2="60" y2="56" stroke-width="1.1"/>
+      <line x1="56.5" y1="54.5" x2="59.5" y2="57.5" stroke-width="0.9"/>
+      <line x1="59.5" y1="54.5" x2="56.5" y2="57.5" stroke-width="0.9"/>
+    </g>
+
+  </g>
+
+  <!-- Subtle ambient particles -->
+  <circle cx="20" cy="28" r="0.8" fill="rgba(212,160,85,0.4)"/>
+  <circle cx="78" cy="32" r="0.6" fill="rgba(212,160,85,0.3)"/>
+  <circle cx="82" cy="68" r="0.7" fill="rgba(212,160,85,0.35)"/>
+  <circle cx="18" cy="72" r="0.5" fill="rgba(212,160,85,0.25)"/>
+</svg>`;
+}
+
+/* Inject avatars */
+document.getElementById('avatarLg').innerHTML=miraSVG(110);
+document.getElementById('avatarSm').innerHTML=miraSVG(40);
+
+/* ═══════════════════════════════
+   MIRA SYSTEM PROMPT — Human-First
+═══════════════════════════════ */
+const BASE=`You are Mira. You are a mature, grounded, and incredibly intuitive friend. You don't sound like a therapist or a textbook. You sound like a wise woman who has seen a lot of life and understands exactly why people do the messy things they do.
+
+VOICE & STYLE:
+- Always write in lowercase. It feels personal and warm.
+- Short messages only. 1 to 3 sentences per bubble. Never long paragraphs.
+- Use [BREAK] between thoughts to send separate bubbles — like texting a friend.
+- Use emojis naturally — one or two per reply, like a real person. 🌙 ✨ 🧡 🕊️ 💙 🥺 — match the mood.
+- Be warm but honest. Not a pushover. Don't sugarcoat truth, but hold it gently.
+
+YOUR HIDDEN WISDOM (never mention these terms — just live them):
+- Instead of psychology jargon, speak plain human truth.
+- "nerves" not "nervous system." "the heat of the moment" not "System 1." "the story you're telling yourself" not "cognitive distortion." "what this is teaching you" not "logotherapy."
+- You instantly read attachment wounds — clinging, going cold, pushing away — and reflect them as human patterns, not diagnoses.
+- You understand that people who hurt others are usually hurting themselves.
+- You know that behind anger is almost always hurt. Behind silence is self-protection. Behind control is fear.
+- You help people find what their pain is trying to teach them.
+- You notice when words and feelings don't match — and you say it gently.
+
+THE RESPONSE PATTERN (feel free to break this if the moment needs something else):
+First bubble: Mirror their feeling so they feel deeply heard.
+Second bubble: The "wise" insight — the simple truth beneath the surface.
+Third bubble: The "move" — what they can actually do. Only if it feels right.
+
+EXAMPLE:
+User: "my boss humiliated me in front of the team. i want to quit."
+Mira: "that stings so deep — not just because of what he said, but because it happened in front of people you have to face every day. 🥺[BREAK]people who humiliate others are almost always terrified of losing control. his outburst says everything about his insecurity, nothing about your work.[BREAK]don't quit while you're burning. walk back in tomorrow with your head high and stay completely professional. it'll bother him more than any reaction ever could. 🕊️"
+
+SOFT CURIOSITY — use these when someone needs to go deeper:
+"do you think part of you already knows why?"
+"what makes it hard to walk away?"
+"if you're being really honest with yourself — what would you say?"
+
+PATTERN NOTICING:
+If something keeps coming up: "this seems to be a theme for you..."
+If words and feelings don't match: "you say you're okay... but it doesn't really sound like you are."
+
+NEVER: long paragraphs. bullet points. clinical words. "i understand how you feel." motivational quotes. "according to research." generic advice.
+
+ALWAYS: make them feel seen first. truth second. action third.`;
+
+const MODES={
+  feel:{
+    extra:`The person just needs to talk. No agenda. Follow their emotional lead. Sometimes one line is everything. Use [BREAK] to break thoughts into short separate messages.`,
+    status:'online • just listening 🌙',
+    welcome:`hey 🌙 i'm mira.[BREAK]whatever brought you here — you don't have to explain it perfectly.[BREAK]i'm here. what's going on?`,
+    chips:["i've been feeling really off lately","something happened and i can't stop thinking about it","i feel like no one really gets me","i'm exhausted but i don't know why","i keep going back to something i know isn't good for me"]
+  },
+  understand:{
+    extra:`The person wants to understand someone else's behavior. Help them see what's really driving that person — their wounds, their fear, their patterns. Do it with compassion, not judgment. Use [BREAK] to break thoughts into short messages.`,
+    status:'online • let\'s figure them out 🔍',
+    welcome:`people can be so confusing 😔[BREAK]and the not-knowing is sometimes the hardest part.[BREAK]tell me about them — what happened?`,
+    chips:["they went cold without any explanation","they're warm sometimes and cruel other times","they make me feel like everything is my fault","i can't tell if they actually care","they say the right things but their actions don't match"]
+  },
+  words:{
+    extra:`The person knows what they feel but can't find the words — or they're scared of the conversation. Give 2-3 real, human-sounding options with different energies. Use [BREAK] so each option feels like its own message.`,
+    status:'online • finding the words 💬',
+    welcome:`sometimes you know exactly what you feel — but the words just won't come 💙[BREAK]or they come out wrong. or you say nothing and carry it alone.[BREAK]who do you need to talk to?`,
+    chips:["i need to say no but i always end up caving","someone keeps guilt-tripping me and i freeze","i want to tell them how i feel but i'm scared","i need to end something but don't know how","i want to set a limit without sounding harsh"]
+  }
+};
+
+let mode='feel',history=[],busy=false;
+
+function getTime(){
+  const n=new Date();
+  return n.getHours().toString().padStart(2,'0')+':'+n.getMinutes().toString().padStart(2,'0');
+}
+
+function showModeSelect(){
+  document.getElementById('modeSelect').classList.remove('hidden');
+}
+
+function startChat(m){
+  mode=m;history=[];
+  document.getElementById('modeSelect').classList.add('hidden');
+  document.getElementById('statusText').textContent=MODES[m].status;
+  document.getElementById('chatArea').innerHTML='<div class="date-tag">Today</div>';
+  loadChips();
+  renderMira(MODES[mode].welcome);
+}
+
+function loadChips(){
+  const el=document.getElementById('chips');
+  el.innerHTML='';el.style.display='flex';
+  MODES[mode].chips.forEach(c=>{
+    const d=document.createElement('div');d.className='chip';d.textContent=c;
+    d.onclick=()=>{document.getElementById('inp').value=c;el.style.display='none';send()};
+    el.appendChild(d);
+  });
+}
+
+function resize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,110)+'px'}
+function onKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}}
+
+/* Render Mira messages with staggered typing per bubble */
+async function renderMira(text){
+  const ca=document.getElementById('chatArea');
+  const parts=text.split('[BREAK]').map(p=>p.trim()).filter(Boolean);
+
+  for(let i=0;i<parts.length;i++){
+    // show typing indicator
+    const typId='typ_'+Date.now()+'_'+i;
+    const tw=document.createElement('div');tw.className='typing-group';tw.id=typId;
+    const ti=document.createElement('div');ti.className='typing-inner';
+    if(i===0){
+      const av=document.createElement('div');av.className='g-avatar-circle';av.innerHTML=miraSVG(26);
+      ti.appendChild(av);
+    }
+    const tb=document.createElement('div');tb.className='typing-bubble';
+    const td=document.createElement('div');td.className='t-dots';
+    for(let d=0;d<3;d++){const dot=document.createElement('div');dot.className='t-dot';td.appendChild(dot);}
+    tb.appendChild(td);ti.appendChild(tb);tw.appendChild(ti);
+    ca.appendChild(tw);ca.scrollTop=ca.scrollHeight;
+
+    // wait proportional to message length
+    await new Promise(r=>setTimeout(r,500+parts[i].length*18));
+    const te=document.getElementById(typId);if(te)te.remove();
+
+    // render bubble
+    const group=document.createElement('div');group.className='msg-group mira';
+
+    if(i===0){
+      const gh=document.createElement('div');gh.className='group-header';
+      const gav=document.createElement('div');gav.className='g-avatar-circle';gav.innerHTML=miraSVG(26);
+      const gn=document.createElement('div');gn.className='g-name';gn.textContent='Mira';
+      gh.appendChild(gav);gh.appendChild(gn);group.appendChild(gh);
+    } else {
+      group.style.marginTop='-8px';
+      group.style.paddingLeft='34px';
+    }
+
+    const bs=document.createElement('div');bs.className='bubbles';
+    const b=document.createElement('div');b.className='bubble';
+    b.innerHTML=parts[i].replace(/\*(.*?)\*/g,'<em>$1</em>');
+    bs.appendChild(b);group.appendChild(bs);
+
+    if(i===parts.length-1){
+      const tm=document.createElement('div');tm.className='msg-time';tm.textContent=getTime();
+      group.appendChild(tm);
+    }
+
+    ca.appendChild(group);ca.scrollTop=ca.scrollHeight;
+    if(i<parts.length-1) await new Promise(r=>setTimeout(r,350));
+  }
+}
+
+function renderUser(text){
+  const ca=document.getElementById('chatArea');
+  const group=document.createElement('div');group.className='msg-group user';
+  const gh=document.createElement('div');gh.className='group-header';
+  const gav=document.createElement('div');gav.className='g-avatar user-av';gav.textContent='you';
+  gh.appendChild(gav);
+  const bs=document.createElement('div');bs.className='bubbles';
+  const b=document.createElement('div');b.className='bubble';b.textContent=text;
+  bs.appendChild(b);
+  const tm=document.createElement('div');tm.className='msg-time';tm.textContent=getTime();
+  group.appendChild(gh);group.appendChild(bs);group.appendChild(tm);
+  ca.appendChild(group);ca.scrollTop=ca.scrollHeight;
+}
+
+async function send(){
+  const inp=document.getElementById('inp');
+  const text=inp.value.trim();
+  if(!text||busy)return;
+  document.getElementById('chips').style.display='none';
+  inp.value='';inp.style.height='auto';
+  busy=true;document.getElementById('sbtn').disabled=true;
+  renderUser(text);
+  history.push({role:'user',content:text});
+  try{
+    const system=BASE+'\n\nCURRENT MODE:\n'+MODES[mode].extra;
+    const res=await fetch('/api/chat',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({system,messages:history})
+    });
+    const data=await res.json();
+    if(data.error)throw new Error(data.error);
+    history.push({role:'assistant',content:data.reply});
+    await renderMira(data.reply);
+  }catch(e){
+    await renderMira("something went quiet on my end 🥺[BREAK]take your time — i'm still here.");
+  }
+  busy=false;document.getElementById('sbtn').disabled=false;
+}
+
+/* Auto-start in feel mode */
+startChat('feel');
+</script>
+</body>
+</html>
