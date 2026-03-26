@@ -38,29 +38,31 @@ canvas#bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer
 
 #welcome { padding: 40px 20px; text-align: center; max-width: 440px; width: 100%; }
 
-/* PROFILE FRAME */
+/* PROFILE FRAME (UPDATED FOR LOGO) */
 .mira-portrait-frame {
-  width: 230px; height: 230px;
+  width: 260px; height: 260px;
   margin: 0 auto 30px;
-  border-radius: 50%;
+  border-radius: 20px;
   border: 1.5px solid var(--gold);
-  padding: 5px;
+  padding: 10px;
   background: #1e0f08;
   box-shadow: 0 20px 60px rgba(0,0,0,0.9), 0 0 30px rgba(232, 168, 112, 0.1);
-  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .mira-img {
-  width: 100%; height: 100%;
-  border-radius: 50%;
-  object-fit: cover;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
   display: block;
 }
 
 .mira-name { 
   font-family: 'Ibarra Real Nova', serif; 
-  font-style: italic; font-size: 78px; font-weight: 700;
-  color: var(--gold); margin-bottom: 45px; letter-spacing: -4px;
+  font-style: italic; font-size: 72px; font-weight: 700;
+  color: var(--gold); margin-bottom: 45px; letter-spacing: -3px;
 }
 
 .mcard {
@@ -78,15 +80,17 @@ canvas#bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer
 #chatscreen { width: 100%; max-width: 700px; height: 100vh; display: flex; flex-direction: column; }
 
 .chat-header {
-  padding: 15px 25px; display: flex; align-items: center; justify-content: space-between;
-  background: rgba(15, 8, 5, 0.98); border-bottom: 1px solid var(--border);
+  padding: 15px 25px;
+  display: flex; align-items: center;
+  background: rgba(15, 8, 5, 0.98);
+  border-bottom: 1px solid var(--border);
 }
 
 .h-identity { display: flex; align-items: center; gap: 15px; }
 
 .h-avatar {
   width: 52px; height: 52px;
-  border-radius: 50%;
+  border-radius: 12px; /* NOT circular anymore */
   overflow: hidden;
   border: 1px solid var(--gold);
 }
@@ -154,7 +158,6 @@ textarea {
   outline: none;
   color: var(--cream);
   font-size: 16px;
-  line-height: 1.5;
   resize: none;
 }
 
@@ -179,10 +182,7 @@ textarea {
 <!-- WELCOME -->
 <div class="screen" id="welcome">
   <div class="mira-portrait-frame">
-    <img class="mira-img"
-      src="https://images.unsplash.com/photo-1494790108377-be9c29b29330"
-      onerror="this.src='https://via.placeholder.com/150'"
-      alt="Mira">
+    <img class="mira-img" src="mira-logo.png" alt="Mira">
   </div>
 
   <h1 class="mira-name">mira</h1>
@@ -196,10 +196,7 @@ textarea {
   <header class="chat-header">
     <div class="h-identity">
       <div class="h-avatar">
-        <img class="mira-img"
-          src="https://images.unsplash.com/photo-1494790108377-be9c29b29330"
-          onerror="this.src='https://via.placeholder.com/150'"
-          alt="Mira">
+        <img class="mira-img" src="mira-logo.png" alt="Mira">
       </div>
       <div>
         <div class="h-name">mira</div>
