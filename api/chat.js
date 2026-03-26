@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mira</title>
 <style>
-/* --- TYPOGRAPHY --- */
 @import url('https://fonts.googleapis.com/css2?family=Ibarra+Real+Nova:ital,wght@1,600;1,700&family=Nunito:wght@300;400;500;600&display=swap');
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -61,7 +60,6 @@ canvas#bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer
   font-family: 'Ibarra Real Nova', serif; 
   font-style: italic; font-size: 78px; font-weight: 700;
   color: var(--gold); margin-bottom: 45px; letter-spacing: -4px;
-  text-shadow: 0 10px 20px rgba(0,0,0,0.5);
 }
 
 .mcard {
@@ -80,7 +78,7 @@ canvas#bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer
 #chatscreen { width: 100%; max-width: 700px; height: 100vh; display: flex; flex-direction: column; }
 .chat-header {
   padding: 15px 25px; display: flex; align-items: center; justify-content: space-between;
-  background: rgba(15, 8, 5, 0.98); border-bottom: 1px solid var(--border); backdrop-filter: blur(20px);
+  background: rgba(15, 8, 5, 0.98); border-bottom: 1px solid var(--border);
 }
 .h-identity { display: flex; align-items: center; gap: 15px; }
 .h-avatar { width: 52px; height: 52px; border-radius: 50%; overflow: hidden; border: 1px solid var(--gold); }
@@ -95,7 +93,7 @@ canvas#bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer
 
 .input-section { padding: 20px 25px 40px; background: rgba(15, 8, 5, 0.98); border-top: 1px solid var(--border); }
 .ibox { display: flex; gap: 15px; align-items: flex-end; background: #140a07; border: 1px solid var(--border); border-radius: 35px; padding: 12px 12px 12px 28px; }
-textarea { flex: 1; background: transparent; border: none; outline: none; color: var(--cream); font-size: 16px; line-height: 1.5; resize: none; max-height: 150px; }
+textarea { flex: 1; background: transparent; border: none; outline: none; color: var(--cream); font-size: 16px; line-height: 1.5; resize: none; }
 .btn-send { width: 48px; height: 48px; border-radius: 50%; background: var(--amber); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 </style>
 </head>
@@ -104,7 +102,7 @@ textarea { flex: 1; background: transparent; border: none; outline: none; color:
 
 <div class="screen" id="welcome">
   <div class="mira-portrait-frame">
-    <img src="https://i.postimg.cc/9F3Nv7ck/Gemini-Generated-Image-slx6cdslx6cdslx6.png?v=2" alt="Mira">
+    <img id="p1" src="https://i.postimg.cc/9F3Nv7ck/Gemini-Generated-Image-slx6cdslx6cdslx6.png" alt="Mira">
   </div>
   <h1 class="mira-name">mira</h1>
   <div class="mcard" onclick="startChat('talk')">talk</div>
@@ -115,11 +113,11 @@ textarea { flex: 1; background: transparent; border: none; outline: none; color:
   <header class="chat-header">
     <div class="h-identity">
       <div class="h-avatar">
-        <img src="https://i.postimg.cc/9F3Nv7ck/Gemini-Generated-Image-slx6cdslx6cdslx6.png?v=2" alt="Mira Avatar">
+        <img id="p2" src="https://i.postimg.cc/9F3Nv7ck/Gemini-Generated-Image-slx6cdslx6cdslx6.png" alt="Mira">
       </div>
       <div>
         <div class="h-name">mira</div>
-        <div style="font-size:10px; color:#6db87a; font-weight:700; letter-spacing:1px;">ONLINE</div>
+        <div style="font-size:10px; color:#6db87a; font-weight:700;">ONLINE</div>
       </div>
     </div>
   </header>
@@ -133,6 +131,7 @@ textarea { flex: 1; background: transparent; border: none; outline: none; color:
 </div>
 
 <script>
+/* STAR BACKGROUND */
 (function(){
   const c=document.getElementById('bg'),ctx=c.getContext('2d');
   let W,H,stars=[];
@@ -141,10 +140,18 @@ textarea { flex: 1; background: transparent; border: none; outline: none; color:
   window.addEventListener('resize',init);init();draw();
 })();
 
-const SYSTEM = `You are Mira. Wise friend. lowercase. short sentences. give strategic moves.`;
-let history=[], busy=false;
+/* CACHE BUSTER SCRIPT */
+window.onload = function() {
+  const ts = new Date().getTime();
+  const link = "https://i.postimg.cc/9F3Nv7ck/Gemini-Generated-Image-slx6cdslx6cdslx6.png?v=" + ts;
+  document.getElementById('p1').src = link;
+  document.getElementById('p2').src = link;
+};
 
-function startChat(mode){
+const SYSTEM = `You are Mira. Wise, grounded, mature friend. strictly lowercase. short sentences. give strategic moves.`;
+let busy=false;
+
+function startChat(){
   document.getElementById('welcome').classList.add('hidden');
   document.getElementById('chatscreen').classList.remove('hidden');
   renderMira("i'm here. what's on your mind? ✨");
