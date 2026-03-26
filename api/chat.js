@@ -176,10 +176,13 @@ textarea {
 
 <canvas id="bg"></canvas>
 
-<!-- WELCOME SCREEN -->
+<!-- WELCOME -->
 <div class="screen" id="welcome">
   <div class="mira-portrait-frame">
-    <img class="mira-img" src="https://i.ibb.co/L5Z4D1C/mira-art.png" alt="Mira">
+    <img class="mira-img"
+      src="https://images.unsplash.com/photo-1494790108377-be9c29b29330"
+      onerror="this.src='https://via.placeholder.com/150'"
+      alt="Mira">
   </div>
 
   <h1 class="mira-name">mira</h1>
@@ -188,12 +191,15 @@ textarea {
   <div class="mcard" onclick="startChat()">need advice</div>
 </div>
 
-<!-- CHAT SCREEN -->
+<!-- CHAT -->
 <div class="screen hidden" id="chatscreen">
   <header class="chat-header">
     <div class="h-identity">
       <div class="h-avatar">
-        <img class="mira-img" src="https://i.ibb.co/L5Z4D1C/mira-art.png" alt="Mira">
+        <img class="mira-img"
+          src="https://images.unsplash.com/photo-1494790108377-be9c29b29330"
+          onerror="this.src='https://via.placeholder.com/150'"
+          alt="Mira">
       </div>
       <div>
         <div class="h-name">mira</div>
@@ -219,7 +225,6 @@ textarea {
 </div>
 
 <script>
-/* STAR BACKGROUND */
 (function(){
   const c=document.getElementById('bg'),ctx=c.getContext('2d');
   let W,H,stars=[];
