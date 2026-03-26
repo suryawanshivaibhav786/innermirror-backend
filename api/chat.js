@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mira</title>
 <style>
+/* --- TYPOGRAPHY --- */
 @import url('https://fonts.googleapis.com/css2?family=Ibarra+Real+Nova:ital,wght@1,600;1,700&family=Nunito:wght@300;400;500;600&display=swap');
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -78,7 +79,7 @@ canvas#bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer
 #chatscreen { width: 100%; max-width: 700px; height: 100vh; display: flex; flex-direction: column; }
 .chat-header {
   padding: 15px 25px; display: flex; align-items: center; justify-content: space-between;
-  background: rgba(15, 8, 5, 0.98); border-bottom: 1px solid var(--border);
+  background: rgba(15, 8, 5, 0.98); border-bottom: 1px solid var(--border); backdrop-filter: blur(20px);
 }
 .h-identity { display: flex; align-items: center; gap: 15px; }
 .h-avatar { width: 52px; height: 52px; border-radius: 50%; overflow: hidden; border: 1px solid var(--gold); }
@@ -93,7 +94,7 @@ canvas#bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer
 
 .input-section { padding: 20px 25px 40px; background: rgba(15, 8, 5, 0.98); border-top: 1px solid var(--border); }
 .ibox { display: flex; gap: 15px; align-items: flex-end; background: #140a07; border: 1px solid var(--border); border-radius: 35px; padding: 12px 12px 12px 28px; }
-textarea { flex: 1; background: transparent; border: none; outline: none; color: var(--cream); font-size: 16px; line-height: 1.5; resize: none; }
+textarea { flex: 1; background: transparent; border: none; outline: none; color: var(--cream); font-size: 16px; line-height: 1.5; resize: none; max-height: 150px; }
 .btn-send { width: 48px; height: 48px; border-radius: 50%; background: var(--amber); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 </style>
 </head>
@@ -102,7 +103,7 @@ textarea { flex: 1; background: transparent; border: none; outline: none; color:
 
 <div class="screen" id="welcome">
   <div class="mira-portrait-frame">
-    <img id="p1" src="https://i.postimg.cc/9F3Nv7ck/Gemini-Generated-Image-slx6cdslx6cdslx6.png" alt="Mira">
+    <img src="https://i.postimg.cc/9F3Nv7ck/Gemini-Generated-Image-slx6cdslx6cdslx6.png" alt="Mira">
   </div>
   <h1 class="mira-name">mira</h1>
   <div class="mcard" onclick="startChat('talk')">talk</div>
@@ -113,7 +114,7 @@ textarea { flex: 1; background: transparent; border: none; outline: none; color:
   <header class="chat-header">
     <div class="h-identity">
       <div class="h-avatar">
-        <img id="p2" src="https://i.postimg.cc/9F3Nv7ck/Gemini-Generated-Image-slx6cdslx6cdslx6.png" alt="Mira">
+        <img src="https://i.postimg.cc/9F3Nv7ck/Gemini-Generated-Image-slx6cdslx6cdslx6.png" alt="Mira">
       </div>
       <div>
         <div class="h-name">mira</div>
@@ -124,7 +125,7 @@ textarea { flex: 1; background: transparent; border: none; outline: none; color:
   <main class="chat-area" id="chatArea"></main>
   <footer class="input-section">
     <div class="ibox">
-      <textarea id="inp" placeholder="Message Mira..." rows="1" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+      <textarea id="inp" placeholder="Message Mira..." rows="1"></textarea>
       <button class="btn-send" onclick="send()"><svg viewBox="0 0 24 24" width="22" fill="white"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button>
     </div>
   </footer>
@@ -140,21 +141,10 @@ textarea { flex: 1; background: transparent; border: none; outline: none; color:
   window.addEventListener('resize',init);init();draw();
 })();
 
-/* CACHE BUSTER SCRIPT */
-window.onload = function() {
-  const ts = new Date().getTime();
-  const link = "https://i.postimg.cc/9F3Nv7ck/Gemini-Generated-Image-slx6cdslx6cdslx6.png?v=" + ts;
-  document.getElementById('p1').src = link;
-  document.getElementById('p2').src = link;
-};
-
-const SYSTEM = `You are Mira. Wise, grounded, mature friend. strictly lowercase. short sentences. give strategic moves.`;
-let busy=false;
-
 function startChat(){
   document.getElementById('welcome').classList.add('hidden');
   document.getElementById('chatscreen').classList.remove('hidden');
-  renderMira("i'm here. what's on your mind? ✨");
+  renderMira("i'm listening. what's on your mind? ✨");
 }
 
 async function renderMira(text){
@@ -162,16 +152,6 @@ async function renderMira(text){
   const g=document.createElement('div'); g.className='msg mira';
   g.innerHTML=`<div class="bubble">${text.toLowerCase()}</div>`;
   ca.appendChild(g); ca.scrollTop=ca.scrollHeight;
-}
-
-async function send(){
-  const inp=document.getElementById('inp'); const val=inp.value.trim();
-  if(!val || busy) return;
-  inp.value=''; busy=true;
-  const g=document.createElement('div'); g.className='msg user';
-  g.innerHTML=`<div class="bubble">${val}</div>`;
-  document.getElementById('chatArea').appendChild(g);
-  busy=false;
 }
 </script>
 </body>
