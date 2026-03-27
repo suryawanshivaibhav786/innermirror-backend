@@ -26,17 +26,11 @@ html,body{height:100%;overflow:hidden;}
 body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--cream);display:flex;align-items:stretch;justify-content:center;}
 canvas#bg{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;}
 
-/* ── MIRA AVATAR PORTRAIT ── */
-/* Beautiful illustrated woman — clean modern style */
-.mira-portrait{
-  position:relative;
-  border-radius:50%;
-  overflow:hidden;
-  background:linear-gradient(160deg,#1a0f28 0%,#2d1a40 40%,#1a0f28 100%);
-  flex-shrink:0;
+/* ── MIRA AVATAR ── */
+function miraAvatar(size){
+  // Loads your attached image perfectly scaled into the circular containers
+  return `<img src="mira.jpg" style="width: 100%; height: 100%; object-fit: cover; display: block;" alt="Mira">`;
 }
-
-.mira-portrait svg{display:block;width:100%;height:100%;}
 
 /* MODE OVERLAY */
 #modeSelect{
