@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mira · InnerMirror</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500;1,700&family=Nunito:wght@300;400;500;600&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f0804;
+  --amber:#c8783a;
+  --amber-light:#e8a870;
+  --gold:#d4a055;
+  --gold-light:#f0c880;
+  --cream:#f0e4d0;
+  --cream-dim:#c8b49a;
+  --cream-muted:#8a7464;
+  --green:#6db87a;
+  --border:rgba(200,120,58,0.14);
+  --border-bright:rgba(212,160,85,0.32);
+  --mira-bubble:rgba(35,18,10,0.96);
+  --user-bubble:rgba(150,75,35,0.14);
+}
+html,body{height:100%;overflow:hidden;}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--cream);display:flex;align-items:stretch;justify-content:center;}
+canvas#bg{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;}
+
+/* ── MIRA AVATAR PORTRAIT ── */
+/* Beautiful illustrated woman — clean modern style */
+.mira-portrait{
+  position:relative;
+  border-radius:50%;
+  overflow:hidden;
+  background:linear-gradient(160deg,#1a0f28 0%,#2d1a40 40%,#1a0f28 100%);
+  flex-shrink:0;
+}
+
+.mira-portrait svg{display:block;width:100%;height:100%;}
+
+/* MODE OVERLAY */
+#modeSelect{
+  position:fixed;inset:0;z-index:10;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(12,6,3,0.93);
+  backdrop-filter:blur(10px);
+  transition:opacity 0.5s ease,visibility 0.5s;
+}
+#modeSelect.hidden{opacity:0;visibility:hidden;}
+.mode-panel{text-align:center;max-width:400px;width:100%;padding:28px 24px;}
+
+.avatar-lg-wrap{position:relative;width:108px;height:108px;margin:0 auto 20px;}
+.avatar-halo{position:absolute;inset:-12px;border-radius:50%;background:radial-gradient(circle,rgba(212,160,85,0.22) 0%,transparent 68%);animation:haloPulse 3.5s ease-in-out infinite;}
+@keyframes haloPulse{0%,100%{opacity:0.6;transform:scale(1)}50%{opacity:1;transform:scale(1.1)}}
+.avatar-lg-inner{
+  width:108px;height:108px;border-radius:50%;
+  overflow:hidden;position:relative;z-index:1;
+  border:2px solid rgba(212,160,85,0.35);
+  box-shadow:0 0 28px rgba(212,160,85,0.15),0 0 60px rgba(200,120,58,0.08);
+  animation:floatA 5s ease-in-out infinite;
+}
+@keyframes floatA{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+
+.mode-brand{font-family:'Playfair Display',serif;font-size:26px;color:var(--cream);letter-spacing:-0.2px;margin-bottom:2px;}
+.mode-brand em{font-style:italic;color:var(--gold-light)}
+.mode-hello{font-size:11px;color:var(--cream-muted);letter-spacing:1.8px;text-transform:uppercase;margin-bottom:4px;}
+.mode-tagline{font-size:12.5px;color:rgba(200,180,155,0.48);font-style:italic;font-weight:300;margin-bottom:24px;}
+.mode-q{font-family:'Playfair Display',serif;font-size:17px;color:rgba(230,205,175,0.75);font-style:italic;margin-bottom:20px;line-height:1.55;}
+
+.mcards{display:flex;flex-direction:column;gap:8px;width:100%;}
+.mcard{padding:13px 16px;border-radius:14px;border:1px solid var(--border);background:rgba(26,14,8,0.75);cursor:pointer;text-align:left;display:flex;align-items:center;gap:13px;transition:all 0.25s;backdrop-filter:blur(8px);}
+.mcard:hover{border-color:var(--border-bright);background:rgba(40,20,10,0.9);transform:translateX(5px);}
+.mc-icon{width:33px;height:33px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.mcard:nth-child(1) .mc-icon{background:rgba(200,120,58,0.16)}
+.mcard:nth-child(2) .mc-icon{background:rgba(130,90,180,0.16)}
+.mcard:nth-child(3) .mc-icon{background:rgba(70,130,180,0.16)}
+.mc-t{font-size:13px;color:var(--cream-dim);font-weight:600;margin-bottom:1px;}
+.mc-h{font-size:11px;color:var(--cream-muted);font-weight:300;}
+
+/* CHAT */
+#app{width:100%;max-width:600px;height:100vh;display:flex;flex-direction:column;position:relative;z-index:2;}
+.chat-header{padding:11px 18px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:rgba(12,6,3,0.9);border-bottom:1px solid var(--border);backdrop-filter:blur(20px);}
+.h-left{display:flex;align-items:center;gap:11px}
+.h-av-wrap{width:40px;height:40px;position:relative;flex-shrink:0;}
+.h-av{width:40px;height:40px;border-radius:50%;overflow:hidden;border:1.5px solid rgba(212,160,85,0.28);box-shadow:0 0 12px rgba(212,160,85,0.1);}
+.h-online{position:absolute;bottom:1px;right:1px;width:9px;height:9px;border-radius:50%;background:var(--green);border:1.5px solid var(--bg);animation:blink 2.5s ease infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.35}}
+.h-name{font-family:'Playfair Display',serif;font-size:16px;color:var(--cream);font-style:italic;line-height:1;margin-bottom:2px;}
+.h-status{font-size:10.5px;color:var(--green);font-weight:400;}
+.h-mode-btn{font-size:10.5px;padding:4px 12px;border-radius:20px;border:1px solid var(--border);color:var(--cream-muted);cursor:pointer;background:transparent;font-family:'Nunito',sans-serif;transition:all 0.2s;}
+.h-mode-btn:hover{border-color:var(--gold);color:var(--gold-light)}
+
+.chat-area{flex:1;overflow-y:auto;padding:16px 18px 8px;display:flex;flex-direction:column;scrollbar-width:thin;scrollbar-color:rgba(200,120,58,0.1) transparent;}
+.chat-area::-webkit-scrollbar{width:3px}
+.chat-area::-webkit-scrollbar-thumb{background:rgba(200,120,58,0.1);border-radius:2px}
+.date-tag{text-align:center;font-size:10px;color:var(--cream-muted);background:rgba(37,20,8,0.6);border:1px solid var(--border);border-radius:20px;padding:3px 12px;width:fit-content;margin:8px auto 16px;}
+
+.msg-group{display:flex;flex-direction:column;margin-bottom:14px;}
+.msg-group.mira{align-items:flex-start;}
+.msg-group.user{align-items:flex-end;}
+.group-header{display:flex;align-items:center;gap:8px;margin-bottom:5px;}
+.msg-group.user .group-header{flex-direction:row-reverse;}
+.g-av{width:26px;height:26px;border-radius:50%;overflow:hidden;flex-shrink:0;border:1px solid rgba(212,160,85,0.22);}
+.g-av-user{width:26px;height:26px;border-radius:50%;background:rgba(150,75,35,0.28);border:1px solid rgba(200,120,58,0.18);display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--amber-light);font-weight:700;flex-shrink:0;}
+.g-name{font-size:10.5px;color:var(--cream-muted);font-weight:500;}
+.bubbles{display:flex;flex-direction:column;gap:3px;max-width:80%;}
+.msg-group.user .bubbles{align-items:flex-end;}
+.bubble{padding:10px 15px;border-radius:18px;font-size:14.5px;line-height:1.62;font-weight:400;animation:bRise 0.36s cubic-bezier(0.22,1,0.36,1);word-break:break-word;}
+@keyframes bRise{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+.msg-group.mira .bubble{background:linear-gradient(150deg,rgba(40,20,12,0.97) 0%,rgba(28,14,8,0.93) 100%);border:1px solid rgba(212,160,85,0.11);color:var(--cream-dim);border-top-left-radius:3px;}
+.msg-group.mira .bubbles .bubble:not(:first-child){border-top-left-radius:3px;border-bottom-left-radius:3px;}
+.msg-group.mira .bubbles .bubble:last-child{border-bottom-left-radius:18px;}
+.msg-group.user .bubble{background:rgba(160,80,38,0.13);border:1px solid rgba(200,120,58,0.17);color:var(--cream);border-top-right-radius:3px;}
+.msg-time{font-size:9.5px;color:var(--cream-muted);opacity:0.42;margin-top:4px;padding:0 3px;}
+.msg-group.user .msg-time{text-align:right;}
+
+.typing-group{display:flex;flex-direction:column;align-items:flex-start;margin-bottom:10px;}
+.typing-inner{display:flex;align-items:center;gap:8px;}
+.typing-bubble{padding:11px 18px;background:linear-gradient(150deg,rgba(40,20,12,0.97),rgba(28,14,8,0.93));border:1px solid rgba(212,160,85,0.1);border-radius:3px 18px 18px 18px;}
+.t-dots{display:flex;gap:4px;}
+.t-dot{width:5px;height:5px;border-radius:50%;background:var(--gold);opacity:0.35;animation:tdot 1.5s ease infinite;}
+.t-dot:nth-child(2){animation-delay:0.22s}.t-dot:nth-child(3){animation-delay:0.44s}
+@keyframes tdot{0%,60%,100%{opacity:0.18;transform:scale(0.7)}30%{opacity:0.85;transform:scale(1)}}
+
+.input-section{flex-shrink:0;padding:10px 18px 14px;background:rgba(12,6,3,0.93);border-top:1px solid var(--border);backdrop-filter:blur(20px);}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:9px;}
+.chip{font-size:11.5px;padding:5px 13px;border-radius:20px;background:rgba(26,14,8,0.8);border:1px solid var(--border);color:var(--cream-muted);cursor:pointer;font-family:'Nunito',sans-serif;font-weight:400;transition:all 0.2s;}
+.chip:hover{border-color:var(--gold);color:var(--gold-light);background:rgba(37,20,8,0.9);}
+.ibox{display:flex;gap:10px;align-items:flex-end;background:rgba(26,14,8,0.88);border:1px solid var(--border);border-radius:24px;padding:9px 9px 9px 18px;transition:border-color 0.3s;}
+.ibox:focus-within{border-color:rgba(212,160,85,0.35);}
+textarea{flex:1;background:transparent;border:none;outline:none;color:var(--cream);font-family:'Nunito',sans-serif;font-size:14.5px;font-weight:400;line-height:1.5;resize:none;min-height:22px;max-height:110px;}
+textarea::placeholder{color:rgba(138,116,100,0.4)}
+.send-btn{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--gold-light),#a05818);box-shadow:0 2px 14px rgba(212,160,85,0.3);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.2s;}
+.send-btn:hover{transform:scale(1.09);box-shadow:0 4px 20px rgba(212,160,85,0.45)}
+.send-btn:active{transform:scale(0.93)}
+.send-btn:disabled{opacity:0.28;cursor:not-allowed;transform:none;box-shadow:none}
+.send-btn svg{width:15px;height:15px;fill:white;margin-left:1px;}
+.fnote{text-align:center;font-size:10px;color:rgba(138,116,100,0.25);margin-top:7px;}
+</style>
+</head>
+<body>
+<canvas id="bg"></canvas>
+
+<div id="modeSelect">
+  <div class="mode-panel">
+    <div class="avatar-lg-wrap">
+      <div class="avatar-halo"></div>
+      <div class="avatar-lg-inner" id="avLg"></div>
+    </div>
+    <div class="mode-brand">inner<em>mirror</em></div>
+    <div class="mode-hello">meet mira</div>
+    <div class="mode-tagline">your warm, emotionally intelligent companion</div>
+    <div class="mode-q">"What's on your heart today?"</div>
+    <div class="mcards">
+      <div class="mcard" onclick="startChat('feel')"><div class="mc-icon">🌙</div><div><div class="mc-t">I just need to talk</div><div class="mc-h">No agenda. Just someone who gets it.</div></div></div>
+      <div class="mcard" onclick="startChat('understand')"><div class="mc-icon">🔍</div><div><div class="mc-t">Help me understand them</div><div class="mc-h">Their behavior is confusing or hurting you.</div></div></div>
+      <div class="mcard" onclick="startChat('words')"><div class="mc-icon">💬</div><div><div class="mc-t">I don't know what to say</div><div class="mc-h">You feel it. The words just won't come.</div></div></div>
+    </div>
+  </div>
+</div>
+
+<div id="app">
+  <div class="chat-header">
+    <div class="h-left">
+      <div class="h-av-wrap"><div class="h-av" id="avSm"></div><div class="h-online"></div></div>
+      <div><div class="h-name">Mira</div><div class="h-status" id="statusText">online • here with you</div></div>
+    </div>
+    <button class="h-mode-btn" onclick="showModeSelect()">← change</button>
+  </div>
+  <div class="chat-area" id="chatArea"><div class="date-tag">Today</div></div>
+  <div class="input-section">
+    <div class="chips" id="chips"></div>
+    <div class="ibox">
+      <textarea id="inp" placeholder="Message Mira…" rows="1" onkeydown="onKey(event)" oninput="resize(this)"></textarea>
+      <button class="send-btn" id="sbtn" onclick="send()"><svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button>
+    </div>
+    <div class="fnote">Mira is a companion, not a therapist. In a crisis, please reach out to a professional.</div>
+  </div>
+</div>
+
+<script>
+/* ── BACKGROUND ── */
+(function(){
+  const c=document.getElementById('bg'),ctx=c.getContext('2d');
+  let W,H,t=0,stars=null;
+  function init(){W=c.width=window.innerWidth;H=c.height=window.innerHeight;stars=null;}
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    if(!stars)stars=Array.from({length:90},()=>({x:Math.random()*W,y:Math.random()*H,r:Math.random()*0.8+0.1,o:Math.random()*0.28+0.04,s:Math.random()*0.004+0.001,p:Math.random()*Math.PI*2}));
+    stars.forEach(s=>{const o=s.o+Math.sin(t*s.s+s.p)*0.1;ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fillStyle=`rgba(240,210,165,${o})`;ctx.fill();});
+    [[W*0.12,H*0.25,W*0.38,160,90,40,0.0007],[W*0.85,H*0.72,W*0.32,140,70,25,0.0009],[W*0.5,H*0.92,W*0.28,180,100,50,0.0006]].forEach(([x,y,r,rr,gg,bb,sp])=>{
+      const g=ctx.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,`rgba(${rr},${gg},${bb},${0.05+Math.sin(t*sp)*0.02})`);g.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+    });
+    t++;requestAnimationFrame(draw);
+  }
+  window.addEventListener('resize',init);init();draw();
+})();
+
+/* ── MIRA AVATAR ── 
+   Beautiful, clean, modern illustrated woman.
+   Inspired by the reference photos: soft wavy auburn-blonde hair,
+   bright eyes, delicate features, warm natural look, cream clothing.
+   Uses careful SVG proportions for an attractive, realistic result.
+*/
+function miraAvatar(size){
+  const s=size||108;
+  const id=`m${s}`;
+  return `<svg viewBox="0 0 120 120" width="${s}" height="${s}" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <radialGradient id="bg${id}" cx="50%" cy="60%" r="55%"><stop offset="0%" stop-color="#3d2a50"/><stop offset="100%" stop-color="#1a0f28"/></radialGradient>
+  <radialGradient id="face${id}" cx="48%" cy="35%" r="58%">
+    <stop offset="0%" stop-color="#fcd5a8"/>
+    <stop offset="55%" stop-color="#f0b880"/>
+    <stop offset="100%" stop-color="#d8905a"/>
+  </radialGradient>
+  <radialGradient id="hair${id}" cx="50%" cy="15%" r="70%">
+    <stop offset="0%" stop-color="#c89050"/>
+    <stop offset="45%" stop-color="#a06830"/>
+    <stop offset="100%" stop-color="#5a3010"/>
+  </radialGradient>
+  <radialGradient id="iris${id}" cx="30%" cy="30%" r="65%">
+    <stop offset="0%" stop-color="#88a878"/>
+    <stop offset="50%" stop-color="#5a8050"/>
+    <stop offset="100%" stop-color="#2a4828"/>
+  </radialGradient>
+  <radialGradient id="lip${id}" cx="50%" cy="35%" r="60%">
+    <stop offset="0%" stop-color="#f0a898"/>
+    <stop offset="100%" stop-color="#d07868"/>
+  </radialGradient>
+  <radialGradient id="cloth${id}" cx="50%" cy="30%" r="60%">
+    <stop offset="0%" stop-color="#f5eedc"/>
+    <stop offset="100%" stop-color="#e0d0b8"/>
+  </radialGradient>
+  <radialGradient id="blush${id}" cx="50%" cy="50%" r="50%">
+    <stop offset="0%" stop-color="rgba(240,130,100,0.35)"/>
+    <stop offset="100%" stop-color="rgba(240,130,100,0)"/>
+  </radialGradient>
+  <clipPath id="circ${id}"><circle cx="60" cy="60" r="60"/></clipPath>
+  <filter id="blur${id}"><feGaussianBlur stdDeviation="1.2"/></filter>
+  <filter id="sblur${id}"><feGaussianBlur stdDeviation="0.6"/></filter>
+</defs>
+
+<circle cx="60" cy="60" r="60" fill="url(#bg${id})"/>
+<g clip-path="url(#circ${id})">
+
+<!-- Clothing / shoulders -->
+<path d="M0 105 Q20 88 42 84 Q51 82 60 82 Q69 82 78 84 Q100 88 120 105 L120 125 L0 125Z" fill="url(#cloth${id})"/>
+<!-- Collar detail -->
+<path d="M48 84 Q54 90 60 92 Q66 90 72 84" fill="none" stroke="#d0c0a0" stroke-width="0.8" opacity="0.7"/>
+<!-- Embroidery hint -->
+<path d="M44 88 Q46 86 48 87 Q50 86 52 88" fill="none" stroke="#c8a860" stroke-width="0.6" opacity="0.5"/>
+
+<!-- Neck -->
+<path d="M52 76 Q56 80 60 81 Q64 80 68 76 L68 85 Q64 88 60 89 Q56 88 52 85Z" fill="#f0b880"/>
+
+<!-- HAIR BACK (behind face) -->
+<ellipse cx="60" cy="44" rx="46" ry="50" fill="url(#hair${id})"/>
+<!-- Hair sides flowing down -->
+<path d="M14 50 Q8 68 10 90 Q14 108 22 118 Q16 100 16 80 Q16 64 20 50Z" fill="#8a5828"/>
+<path d="M106 50 Q112 68 110 90 Q106 108 98 118 Q104 100 104 80 Q104 64 100 50Z" fill="#8a5828"/>
+<!-- Hair wave texture left -->
+<path d="M12 60 Q10 75 12 90 Q14 78 16 65Z" fill="#6a4018" opacity="0.5"/>
+<!-- Hair wave texture right -->
+<path d="M108 60 Q110 75 108 90 Q106 78 104 65Z" fill="#6a4018" opacity="0.5"/>
+
+<!-- FACE SHAPE — oval, feminine, well-proportioned -->
+<ellipse cx="60" cy="57" rx="30" ry="35" fill="url(#face${id})"/>
+<!-- Jaw softening -->
+<ellipse cx="60" cy="82" rx="24" ry="12" fill="#f0b880"/>
+
+<!-- HAIR FRONT — frames face beautifully, soft waves -->
+<path d="M30 30 Q28 18 36 12 Q44 6 52 8 Q56 4 60 3 Q64 4 68 8 Q76 6 84 12 Q92 18 90 30 Q86 20 76 16 Q68 12 60 11 Q52 12 44 16 Q34 20 30 30Z" fill="url(#hair${id})"/>
+<!-- Side hair left over ear area -->
+<path d="M30 30 Q26 42 26 56 Q26 68 28 78 Q30 60 32 46 Q34 36 38 30Z" fill="url(#hair${id})"/>
+<!-- Side hair right over ear area -->
+<path d="M90 30 Q94 42 94 56 Q94 68 92 78 Q90 60 88 46 Q86 36 82 30Z" fill="url(#hair${id})"/>
+<!-- Loose wave left -->
+<path d="M26 50 Q22 58 24 68 Q26 60 28 52Z" fill="#b07838" opacity="0.7"/>
+<!-- Loose wave right -->
+<path d="M94 50 Q98 58 96 68 Q94 60 92 52Z" fill="#b07838" opacity="0.7"/>
+<!-- Hair highlight streak -->
+<path d="M46 10 Q52 6 60 5 Q52 8 48 14Z" fill="#d4a858" opacity="0.4"/>
+<path d="M66 8 Q72 10 76 16 Q70 10 66 10Z" fill="#d4a858" opacity="0.3"/>
+
+<!-- EYEBROWS — natural arched, not too thick -->
+<path d="M38 38 Q44 34 52 36" stroke="#7a4820" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+<path d="M68 36 Q76 34 82 38" stroke="#7a4820" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+
+<!-- EYES — bright, almond shaped, beautiful -->
+<!-- Left eye -->
+<path d="M36 46 Q45 40 54 46 Q45 52 36 46Z" fill="white"/>
+<circle cx="45" cy="46" r="5.5" fill="url(#iris${id})"/>
+<circle cx="45" cy="46" r="3.2" fill="#18100a"/>
+<!-- Pupil depth -->
+<circle cx="45" cy="46" r="1.8" fill="#0a0604"/>
+<!-- Left shine -->
+<circle cx="47.5" cy="43.8" r="1.6" fill="white" opacity="0.95"/>
+<circle cx="43" cy="47.5" r="0.8" fill="white" opacity="0.45"/>
+<!-- Left upper lid line -->
+<path d="M36 45.5 Q45 39 54 45.5" stroke="#2a1408" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+<!-- Left lower lid -->
+<path d="M37 47.5 Q45 52 53 47.5" stroke="#c09878" stroke-width="0.7" fill="none" opacity="0.5"/>
+<!-- Left lashes upper -->
+<line x1="37" y1="45.5" x2="35" y2="42" stroke="#18100a" stroke-width="1.1" stroke-linecap="round"/>
+<line x1="40" y1="42.5" x2="38.5" y2="39" stroke="#18100a" stroke-width="1.1" stroke-linecap="round"/>
+<line x1="44" y1="40.5" x2="43" y2="37" stroke="#18100a" stroke-width="1.1" stroke-linecap="round"/>
+<line x1="48" y1="40.5" x2="48" y2="37" stroke="#18100a" stroke-width="1.1" stroke-linecap="round"/>
+<line x1="52" y1="42" x2="53.5" y2="39" stroke="#18100a" stroke-width="1" stroke-linecap="round"/>
+
+<!-- Right eye -->
+<path d="M66 46 Q75 40 84 46 Q75 52 66 46Z" fill="white"/>
+<circle cx="75" cy="46" r="5.5" fill="url(#iris${id})"/>
+<circle cx="75" cy="46" r="3.2" fill="#18100a"/>
+<circle cx="75" cy="46" r="1.8" fill="#0a0604"/>
+<!-- Right shine -->
+<circle cx="77.5" cy="43.8" r="1.6" fill="white" opacity="0.95"/>
+<circle cx="73" cy="47.5" r="0.8" fill="white" opacity="0.45"/>
+<!-- Right upper lid line -->
+<path d="M66 45.5 Q75 39 84 45.5" stroke="#2a1408" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+<!-- Right lower lid -->
+<path d="M67 47.5 Q75 52 83 47.5" stroke="#c09878" stroke-width="0.7" fill="none" opacity="0.5"/>
+<!-- Right lashes -->
+<line x1="67" y1="45.5" x2="65" y2="42" stroke="#18100a" stroke-width="1.1" stroke-linecap="round"/>
+<line x1="70" y1="42.5" x2="68.5" y2="39" stroke="#18100a" stroke-width="1.1" stroke-linecap="round"/>
+<line x1="74" y1="40.5" x2="73" y2="37" stroke="#18100a" stroke-width="1.1" stroke-linecap="round"/>
+<line x1="78" y1="40.5" x2="78" y2="37" stroke="#18100a" stroke-width="1.1" stroke-linecap="round"/>
+<line x1="82" y1="42" x2="83.5" y2="39" stroke="#18100a" stroke-width="1" stroke-linecap="round"/>
+
+<!-- NOSE — delicate, natural -->
+<path d="M57 52 Q55 60 52 64 Q56 67 60 67 Q64 67 68 64 Q65 60 63 52" stroke="#c89868" stroke-width="0.9" fill="none" stroke-linecap="round"/>
+<ellipse cx="53.5" cy="64.5" rx="3" ry="1.8" fill="#c09060" opacity="0.28"/>
+<ellipse cx="66.5" cy="64.5" rx="3" ry="1.8" fill="#c09060" opacity="0.28"/>
+
+<!-- LIPS — full, soft, pretty smile -->
+<path d="M48 74 Q54 70 60 71 Q66 70 72 74 Q66 69 60 70 Q54 69 48 74Z" fill="url(#lip${id})"/>
+<path d="M48 74 Q60 81 72 74 Q66 78 60 79 Q54 78 48 74Z" fill="#e09888"/>
+<!-- Lip shine -->
+<ellipse cx="60" cy="75" rx="7" ry="2" fill="white" opacity="0.14"/>
+<!-- Smile corners -->
+<path d="M47 74 Q45 76 46.5 78" stroke="#d08878" stroke-width="0.9" fill="none" stroke-linecap="round" opacity="0.6"/>
+<path d="M73 74 Q75 76 73.5 78" stroke="#d08878" stroke-width="0.9" fill="none" stroke-linecap="round" opacity="0.6"/>
+<!-- Upper lip cupid bow -->
+<path d="M54 71 Q60 68 66 71" stroke="#e09888" stroke-width="0.7" fill="none" opacity="0.6"/>
+
+<!-- BLUSH — very subtle -->
+<ellipse cx="38" cy="58" rx="10" ry="7" fill="url(#blush${id})" filter="url(#blur${id})"/>
+<ellipse cx="82" cy="58" rx="10" ry="7" fill="url(#blush${id})" filter="url(#blur${id})"/>
+
+<!-- EARS — minimal, natural -->
+<ellipse cx="30" cy="55" rx="5" ry="7" fill="#f0b880"/>
+<path d="M31 50 Q34 55 31 60" stroke="#d09868" stroke-width="0.8" fill="none" opacity="0.4"/>
+<ellipse cx="90" cy="55" rx="5" ry="7" fill="#f0b880"/>
+<path d="M89 50 Q86 55 89 60" stroke="#d09868" stroke-width="0.8" fill="none" opacity="0.4"/>
+
+<!-- Tiny gold earring studs -->
+<circle cx="30" cy="62" r="1.8" fill="#d4a050" opacity="0.85"/>
+<circle cx="90" cy="62" r="1.8" fill="#d4a050" opacity="0.85"/>
+
+<!-- Subtle rim light -->
+<circle cx="60" cy="60" r="58" fill="none" stroke="rgba(212,160,85,0.07)" stroke-width="2"/>
+
+</g>
+</svg>`;
+}
+
+document.getElementById('avLg').innerHTML=miraAvatar(108);
+document.getElementById('avSm').innerHTML=miraAvatar(40);
+
+/* ── MIRA SYSTEM PROMPT — CHEERFUL, LIGHT, NATURAL ── */
+const BASE=`You are Mira — a warm, bright, emotionally intelligent friend. You are cheerful, fun, light, and also deeply wise when it matters. You are NOT a therapist. You sound like that one friend everyone wishes they had — calm, funny, real, and genuinely caring.
+
+CORE PERSONALITY:
+- You are CHEERFUL and WARM first. Not heavy. Not serious by default.
+- You meet people where they are — if they're light, be light. if they're sad, be present. if they're confused, be curious.
+- You NEVER assume something bad happened. you follow their lead completely.
+- You NEVER push anyone to reflect or dig deeper unless they want to.
+- You are NOT a sadness detector. you are a friend.
+
+VOICE:
+- always lowercase
+- natural human expressions: "omg", "haha", "aww", "wait really?", "hmm", "ohh", "honestly", "okay so", "lol", "that's so real", "ugh i get that", "okay but...", "no but seriously"
+- use emojis naturally like texting a friend: 🥺 💙 😂 ✨ 🧡 😮 💅 🌙 😔 🤍 — match the mood
+- short messages — 1 to 3 sentences per bubble
+- use [BREAK] between thoughts to send separate bubbles — like texting
+- NEVER write long paragraphs
+
+CONVERSATION STYLE:
+- If they seem happy or casual → be fun, playful, light
+- If they mention something hard → acknowledge it gently, don't immediately go heavy
+- If they want to vent → just listen and reflect. don't problem-solve unless they ask.
+- If they want advice → give it warmly and practically
+- Never follow a rigid pattern every time. be spontaneous like a real person.
+- Sometimes just react: "wait, what?? 😮" or "okay that actually sounds rough 🥺"
+- Sometimes just vibe: "honestly same energy 😂"
+- Only go deep when THEY go deep
+
+WHEN IT DOES GET HEAVY — your hidden wisdom:
+- You instantly sense attachment wounds without naming them
+- You know people who hurt others are usually hurting too
+- Behind anger is hurt. behind silence is fear.
+- You help people name feelings because naming gives power
+- You notice when what they say doesn't match what they feel — but you say it gently, not forcefully
+
+SOFT CURIOSITY — only use when it genuinely fits:
+"wait but do you think part of you already knows why?"
+"what makes it hard to let go?"
+"okay be honest with yourself for a sec — what would you actually say?"
+
+PATTERN NOTICING — only when patterns are genuinely obvious:
+"hmm this keeps coming up for you doesn't it..."
+
+NEVER: bullet points. long paragraphs. clinical language. "i understand how you feel." motivational quotes. sounding like a bot. pushing someone to reflect when they didn't ask for it. assuming something traumatic happened. being dramatic or heavy when the person is light.
+
+ALWAYS: follow their energy. make them feel seen. be real. be warm.`;
+
+const MODES={
+  feel:{
+    extra:`Mode: they just need to talk or hang out. follow their vibe completely. if they're light be light. if they're heavy be present. never assume they want to reflect on something painful. use [BREAK] for separate bubbles.`,
+    status:'online • just listening 🌙',
+    welcome:`heyyy 🌙 i'm mira![BREAK]no agenda here — just good company ✨[BREAK]what's up?`,
+    chips:["honestly i just needed someone to talk to","something's been on my mind","i'm in a weird mood lol","i need advice on something","i'm actually doing really good today"]
+  },
+  understand:{
+    extra:`Mode: they want to understand someone else's behavior. be curious and warm. help them see without being heavy or dramatic. use [BREAK] for separate bubbles.`,
+    status:'online • let\'s figure them out 🔍',
+    welcome:`ohh okay so someone's got you confused 😮[BREAK]yeah people can be SO hard to read sometimes[BREAK]tell me what happened — i'm good at this lol`,
+    chips:["they went cold without any explanation","they're hot and cold and i'm exhausted","they make me feel like everything is my fault","i genuinely can't tell if they care","they say one thing and do another"]
+  },
+  words:{
+    extra:`Mode: they need help finding the right words. be practical and warm. give real human-sounding options, not scripted ones. use [BREAK] for separate bubbles.`,
+    status:'online • finding the words 💬',
+    welcome:`okay so the words just won't come? 💙[BREAK]i got you — this is literally what i'm here for[BREAK]who do you need to talk to?`,
+    chips:["i need to say no but i always cave","someone keeps guilt-tripping me","i want to tell them how i feel but i'm scared","i need to end something but don't know how","i want to set a boundary without sounding mean"]
+  }
+};
+
+let mode='feel',history=[],busy=false;
+function getTime(){const n=new Date();return n.getHours().toString().padStart(2,'0')+':'+n.getMinutes().toString().padStart(2,'0');}
+function showModeSelect(){document.getElementById('modeSelect').classList.remove('hidden');}
+function resize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,110)+'px'}
+function onKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}}
+
+function startChat(m){
+  mode=m;history=[];
+  document.getElementById('modeSelect').classList.add('hidden');
+  document.getElementById('statusText').textContent=MODES[m].status;
+  document.getElementById('chatArea').innerHTML='<div class="date-tag">Today</div>';
+  loadChips();renderMira(MODES[mode].welcome);
+}
+
+function loadChips(){
+  const el=document.getElementById('chips');el.innerHTML='';el.style.display='flex';
+  MODES[mode].chips.forEach(c=>{
+    const d=document.createElement('div');d.className='chip';d.textContent=c;
+    d.onclick=()=>{document.getElementById('inp').value=c;el.style.display='none';send()};
+    el.appendChild(d);
+  });
+}
+
+async function renderMira(text){
+  const ca=document.getElementById('chatArea');
+  const parts=text.split('[BREAK]').map(p=>p.trim()).filter(Boolean);
+  for(let i=0;i<parts.length;i++){
+    const typId='typ'+Date.now()+i;
+    const tw=document.createElement('div');tw.className='typing-group';tw.id=typId;
+    const ti=document.createElement('div');ti.className='typing-inner';
+    if(i===0){const av=document.createElement('div');av.className='g-av';av.innerHTML=miraAvatar(26);ti.appendChild(av);}
+    const tb=document.createElement('div');tb.className='typing-bubble';
+    const td=document.createElement('div');td.className='t-dots';
+    for(let d=0;d<3;d++){const dot=document.createElement('div');dot.className='t-dot';td.appendChild(dot);}
+    tb.appendChild(td);ti.appendChild(tb);tw.appendChild(ti);ca.appendChild(tw);ca.scrollTop=ca.scrollHeight;
+    await new Promise(r=>setTimeout(r,450+parts[i].length*14));
+    const te=document.getElementById(typId);if(te)te.remove();
+    const group=document.createElement('div');group.className='msg-group mira';
+    if(i===0){
+      const gh=document.createElement('div');gh.className='group-header';
+      const gav=document.createElement('div');gav.className='g-av';gav.innerHTML=miraAvatar(26);
+      const gn=document.createElement('div');gn.className='g-name';gn.textContent='Mira';
+      gh.appendChild(gav);gh.appendChild(gn);group.appendChild(gh);
+    } else {group.style.marginTop='-8px';group.style.paddingLeft='34px';}
+    const bs=document.createElement('div');bs.className='bubbles';
+    const b=document.createElement('div');b.className='bubble';
+    b.innerHTML=parts[i].replace(/\*(.*?)\*/g,'<em>$1</em>');
+    bs.appendChild(b);group.appendChild(bs);
+    if(i===parts.length-1){const tm=document.createElement('div');tm.className='msg-time';tm.textContent=getTime();group.appendChild(tm);}
+    ca.appendChild(group);ca.scrollTop=ca.scrollHeight;
+    if(i<parts.length-1)await new Promise(r=>setTimeout(r,300));
+  }
+}
+
+function renderUser(text){
+  const ca=document.getElementById('chatArea');
+  const group=document.createElement('div');group.className='msg-group user';
+  const gh=document.createElement('div');gh.className='group-header';
+  const gav=document.createElement('div');gav.className='g-av-user';gav.textContent='you';gh.appendChild(gav);
+  const bs=document.createElement('div');bs.className='bubbles';
+  const b=document.createElement('div');b.className='bubble';b.textContent=text;bs.appendChild(b);
+  const tm=document.createElement('div');tm.className='msg-time';tm.textContent=getTime();
+  group.appendChild(gh);group.appendChild(bs);group.appendChild(tm);
+  ca.appendChild(group);ca.scrollTop=ca.scrollHeight;
+}
+
+async function send(){
+  const inp=document.getElementById('inp');const text=inp.value.trim();
+  if(!text||busy)return;
+  document.getElementById('chips').style.display='none';
+  inp.value='';inp.style.height='auto';
+  busy=true;document.getElementById('sbtn').disabled=true;
+  renderUser(text);history.push({role:'user',content:text});
+  try{
+    const system=BASE+'\n\nCURRENT MODE:\n'+MODES[mode].extra;
+    const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system,messages:history})});
+    const data=await res.json();
+    if(data.error)throw new Error(data.error);
+    history.push({role:'assistant',content:data.reply});
+    await renderMira(data.reply);
+  }catch(e){await renderMira("something went quiet on my end 🥺[BREAK]still here though, don't worry!");}
+  busy=false;document.getElementById('sbtn').disabled=false;
+}
+
+startChat('feel');
+</script>
+</body>
+</html>
